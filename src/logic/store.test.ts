@@ -1,6 +1,14 @@
-import { getRandomAdReward } from './store';
 
-describe('getRandomAdReward', () => {
+import { getRandomAdReward } from './store';
+import { PlayerProgress } from './game';
+
+describe('Store logic', () => {
+  it('should return a valid ad reward', () => {
+    const reward = getRandomAdReward(() => 0.1);
+    expect(['item', 'coins', 'diamonds']).toContain(reward.rewardType);
+    expect(reward.watched).toBe(true);
+    expect(reward.rewardAmount).toBeGreaterThan(0);
+  });
   it('returns item reward when random returns 0', () => {
     const result = getRandomAdReward(() => 0);
     expect(result.rewardType).toBe('item');
