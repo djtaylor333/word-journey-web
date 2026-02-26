@@ -27,7 +27,7 @@ export interface GameState {
   // ...other fields as needed
 }
 
-export function applyLevelCompletion(progress: PlayerProgress, difficulty: Difficulty, completedLevel: number): PlayerProgress {
+export function applyLevelCompletion(progress: PlayerProgress, _difficulty: Difficulty, completedLevel: number): PlayerProgress {
   let updated = { ...progress };
   // Area completion reward: every 25 levels
   if (completedLevel % 25 === 0 && completedLevel > 0) {

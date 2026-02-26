@@ -12,7 +12,7 @@ const KEYS = [
   ['Z','X','C','V','B','N','M'],
 ];
 
-export const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, wordLength }) => {
+export const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, wordLength: _wordLength }) => {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const key = e.key.toUpperCase();

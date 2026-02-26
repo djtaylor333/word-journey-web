@@ -1,7 +1,7 @@
 // Store logic for Word Journeys Web
 // Ported from Android app, TypeScript version
 
-import { PlayerProgress } from './game';
+
 
 export type StoreRewardCategory = 'item' | 'coins' | 'diamonds';
 

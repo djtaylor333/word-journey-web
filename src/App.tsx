@@ -1,8 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+
+import { useState, useEffect } from 'react';
 import './App.css';
-import { PlayerProgress, Difficulty, GameState, applyLevelCompletion } from './logic/game';
-import { getRandomAdReward, AdRewardResult } from './logic/store';
+import type { PlayerProgress, Difficulty, GameState } from './logic/game';
+import { applyLevelCompletion } from './logic/game';
+import { getRandomAdReward } from './logic/store';
+import type { AdRewardResult } from './logic/store';
 import { saveProgress, loadProgress } from './logic/progress';
 import { LockOverlay } from './components/LockOverlay';
 import { Keyboard } from './components/Keyboard';

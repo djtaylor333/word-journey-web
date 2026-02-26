@@ -1,6 +1,6 @@
 // Device-local progress persistence
 
-import { PlayerProgress } from './game';
+import type { PlayerProgress } from './game';
 
 const STORAGE_KEY = 'word-journeys-progress';
 
