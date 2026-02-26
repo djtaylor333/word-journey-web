@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import './App.css';
-import type { PlayerProgress, Difficulty, GameState } from './logic/game';
+import type { PlayerProgress, Difficulty } from './logic/game';
 import { applyLevelCompletion } from './logic/game';
 import { getRandomAdReward } from './logic/store';
 import type { AdRewardResult } from './logic/store';
