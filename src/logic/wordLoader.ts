@@ -17,8 +17,15 @@ export async function loadWords(): Promise<WordsJson> {
 export async function loadValidWords(): Promise<Set<string>> {
   if (validWordsCache) return validWordsCache;
   const res = await fetch('/data/valid_words.json');
-  const arr: string[] = await res.json();
-  validWordsCache = new Set(arr.map(w => w.toUpperCase()));
+  const data: unknown = await res.json();
+  // Support both a flat string[] and a length-keyed { "4": string[], "5": string[], … }
+  let words: string[];
+  if (Array.isArray(data)) {
+    words = data as string[];
+  } else {
+    words = Object.values(data as Record<string, string[]>).flat();
+  }
+  validWordsCache = new Set(words.map(w => w.toUpperCase()));
   return validWordsCache;
 }
 

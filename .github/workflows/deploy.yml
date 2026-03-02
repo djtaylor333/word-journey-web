@@ -24,6 +24,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          NEXT_PUBLIC_GITHUB_PAGES: 'true'
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
