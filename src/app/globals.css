@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #1C1610;
+  color: #F0E8D4;
+  font-family: system-ui, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Tile flip animation helpers */
+.tile-flip-container {
+  perspective: 500px;
+}
+.tile-flip-inner {
+  transform-style: preserve-3d;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #1C1610; }
+::-webkit-scrollbar-thumb { background: #3A3A3C; border-radius: 2px; }
+
+/* Dialog backdrop */
+.dialog-backdrop {
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(4px);
+}
+
+/* Gold shimmer for VIP */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.vip-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.15) 50%, transparent 100%);
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+  pointer-events: none;
+}
+
+/* Confetti particle */
+.confetti-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall {
+  0%   { top: -10%; opacity: 1; }
+  70%  { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}

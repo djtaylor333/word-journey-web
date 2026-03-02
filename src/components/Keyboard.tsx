@@ -1,4 +1,4 @@
-// Responsive keyboard component for touch and physical input
+"use client";
 import React, { useEffect } from 'react';
 
 export interface KeyboardProps {
@@ -25,17 +25,27 @@ export const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, wordLength: _wor
   }, [onKeyPress]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5em' }}>
+    <div className="flex flex-col items-center gap-2">
       {KEYS.map((row, i) => (
-        <div key={i} style={{ display: 'flex', gap: '0.3em' }}>
+        <div key={i} className="flex gap-2">
           {row.map(k => (
-            <button key={k} style={{ padding: '0.7em 1em', fontSize: '1em' }} onClick={() => onKeyPress(k)}>{k}</button>
+            <button
+              key={k}
+              className="px-4 py-2 rounded bg-gradient-to-br from-indigo-500 to-purple-500 text-white font-bold text-lg shadow-md hover:bg-yellow-400 hover:text-black transition-all duration-200"
+              onClick={() => onKeyPress(k)}
+            >{k}</button>
           ))}
         </div>
       ))}
-      <div style={{ display: 'flex', gap: '0.3em' }}>
-        <button style={{ padding: '0.7em 1em', fontSize: '1em' }} onClick={() => onKeyPress('BACKSPACE')}>⌫</button>
-        <button style={{ padding: '0.7em 1em', fontSize: '1em' }} onClick={() => onKeyPress('ENTER')}>⏎</button>
+      <div className="flex gap-2 mt-2">
+        <button
+          className="px-4 py-2 rounded bg-gray-700 text-yellow-300 font-bold text-lg shadow-md hover:bg-yellow-400 hover:text-black transition-all duration-200"
+          onClick={() => onKeyPress('BACKSPACE')}
+        >⌫</button>
+        <button
+          className="px-4 py-2 rounded bg-green-700 text-white font-bold text-lg shadow-md hover:bg-yellow-400 hover:text-black transition-all duration-200"
+          onClick={() => onKeyPress('ENTER')}
+        >⏎</button>
       </div>
     </div>
   );

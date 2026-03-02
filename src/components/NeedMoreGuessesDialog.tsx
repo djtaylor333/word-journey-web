@@ -1,0 +1,56 @@
+"use client";
+import React from 'react';
+
+interface NeedMoreGuessesDialogProps {
+  addGuessItems: number;
+  coins: number;
+  onUseItem: () => void;   // use 1 Add Guess item (free from inventory)
+  onBuyGuess: () => void;  // buy 1 guess for 200 coins
+  onGoToStore: () => void;
+  onDismiss: () => void;
+}
+
+const NeedMoreGuessesDialog: React.FC<NeedMoreGuessesDialogProps> = ({
+  addGuessItems, coins, onUseItem, onBuyGuess, onGoToStore, onDismiss,
+}) => (
+  <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+    <div className="bg-surface border border-borderFilled rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-pop-in">
+      <div className="text-4xl text-center mb-3">😰</div>
+      <h3 className="text-xl font-bold text-center text-onBg mb-2">Out of Guesses!</h3>
+      <p className="text-center text-onSurface/70 text-sm mb-5">Need one more try?</p>
+
+      {addGuessItems > 0 && (
+        <button
+          onClick={onUseItem}
+          className="w-full py-3 rounded-xl bg-tileCorrect text-white font-bold mb-3 hover:opacity-90 transition-opacity"
+        >
+          ➕ Use Add Guess Item ({addGuessItems} in inventory)
+        </button>
+      )}
+
+      <button
+        onClick={onBuyGuess}
+        disabled={coins < 200}
+        className="w-full py-3 rounded-xl bg-primary text-bg font-bold mb-3 disabled:opacity-40 hover:opacity-90 transition-opacity"
+      >
+        🪙 Add 1 Guess (200 coins) — {coins >= 200 ? `${coins} available` : 'Not enough coins'}
+      </button>
+
+      <button
+        onClick={onGoToStore}
+        className="w-full py-3 rounded-xl border border-borderFilled text-onSurface/70 font-semibold mb-3 hover:text-onBg hover:border-onSurface/50 transition-colors"
+      >
+        🛒 Go to Store
+      </button>
+
+      <button
+        onClick={onDismiss}
+        className="w-full py-2 text-onSurface/50 text-sm hover:text-onSurface/80 transition-colors"
+      >
+        Give up on this word
+      </button>
+    </div>
+  </div>
+);
+
+export default NeedMoreGuessesDialog;

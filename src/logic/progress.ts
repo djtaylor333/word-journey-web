@@ -9,7 +9,8 @@ export function saveProgress(progress: PlayerProgress) {
 }
 
 export function loadProgress(): PlayerProgress | null {
-  const raw = localStorage.getItem(STORAGE_KEY);
+  if (typeof window === 'undefined') return null;
+  const raw = window.localStorage.getItem(STORAGE_KEY);
   if (!raw) return null;
   try {
     return JSON.parse(raw);

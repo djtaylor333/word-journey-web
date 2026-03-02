@@ -1,1 +1,0 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/word-journey-web/sw.js', { scope: '/word-journey-web/' })})}

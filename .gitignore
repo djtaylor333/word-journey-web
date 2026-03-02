@@ -13,6 +13,8 @@ dist-ssr
 node_modules
 dist-ssr
 *.local
+.next
+out
 
 # Editor directories and files
 .vscode/*

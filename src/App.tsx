@@ -37,7 +37,11 @@ function getWord(difficulty: Difficulty, level: number): string {
 }
 
 function App() {
-  const [progress, setProgress] = useState<PlayerProgress>(() => loadProgress() || DEFAULT_PROGRESS);
+  const [progress, setProgress] = useState<PlayerProgress>(() => {
+    const loaded = loadProgress();
+    console.log('Loaded progress:', loaded);
+    return loaded || DEFAULT_PROGRESS;
+  });
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [level, setLevel] = useState<number>(progress.easyLevel);
   const [word, setWord] = useState<string>(getWord('easy', progress.easyLevel));
@@ -48,14 +52,30 @@ function App() {
   const [adReward, setAdReward] = useState<AdRewardResult | null>(null);
 
   useEffect(() => {
+    console.log('Saving progress:', progress);
     saveProgress(progress);
   }, [progress]);
 
   useEffect(() => {
-    setWord(getWord(difficulty, level));
+    const newWord = getWord(difficulty, level);
+    console.log('Difficulty/Level changed:', difficulty, level, 'New word:', newWord);
+    setWord(newWord);
     setGuesses([]);
     setStatus('IN_PROGRESS');
   }, [difficulty, level]);
+  useEffect(() => {
+    console.log('App render', {
+      progress,
+      difficulty,
+      level,
+      word,
+      guesses,
+      status,
+      showVipLock,
+      showAndroidLock,
+      adReward
+    });
+  });
 
   function handleKeyPress(key: string) {
     if (status !== 'IN_PROGRESS') return;
