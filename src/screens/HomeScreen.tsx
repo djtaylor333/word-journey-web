@@ -1,8 +1,9 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import type { PlayerProgress, Screen, Difficulty } from '../logic/types';
 import { DIFFICULTY_ACCENT, DIFFICULTY_LABELS } from '../logic/types';
 import LivesDisplay from '../components/LivesDisplay';
+import LockOverlay from '../components/LockOverlay';
 
 interface HomeScreenProps {
   progress: PlayerProgress;
@@ -17,6 +18,8 @@ const diffCards: { d: Difficulty; emoji: string; desc: string }[] = [
 ];
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
+  const [showVipLock, setShowVipLock] = useState(false);
+
   const levelFor = (d: Difficulty): number => {
     if (d === 'easy') return progress.easyLevel;
     if (d === 'regular') return progress.regularLevel;
@@ -99,7 +102,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
               return (
                 <button
                   key={d}
-                  onClick={() => onNavigate({ name: 'levelSelect', difficulty: d })}
+                  onClick={() => {
+                    if (isVip && !progress.isVip) { setShowVipLock(true); return; }
+                    onNavigate({ name: 'levelSelect', difficulty: d });
+                  }}
                   className="relative flex flex-col items-center p-4 rounded-2xl bg-surface border border-borderFilled/50 hover:border-primary/40 transition-all active:scale-95 overflow-hidden"
                   style={{ borderColor: accent + '30' }}
                 >
@@ -176,6 +182,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
           </div>
         </section>
       </div>
+
+      {/* VIP lock overlay */}
+      {showVipLock && (
+        <LockOverlay
+          title="VIP Exclusive"
+          message="VIP adventure mode is available in the Android app. Download to unlock unlimited VIP levels, exclusive themes, and more."
+          onClose={() => setShowVipLock(false)}
+        />
+      )}
     </div>
   );
 };

@@ -7,16 +7,19 @@ interface WordsJson {
 let wordsCache: WordsJson | null = null;
 let validWordsCache: Set<string> | null = null;
 
+// Prefix all data fetches with the Next.js basePath when deployed to GitHub Pages
+const BASE_PATH = process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true' ? '/word-journey-web' : '';
+
 export async function loadWords(): Promise<WordsJson> {
   if (wordsCache) return wordsCache;
-  const res = await fetch('/data/words.json');
+  const res = await fetch(`${BASE_PATH}/data/words.json`);
   wordsCache = await res.json() as WordsJson;
   return wordsCache;
 }
 
 export async function loadValidWords(): Promise<Set<string>> {
   if (validWordsCache) return validWordsCache;
-  const res = await fetch('/data/valid_words.json');
+  const res = await fetch(`${BASE_PATH}/data/valid_words.json`);
   const data: unknown = await res.json();
   // Support both a flat string[] and a length-keyed { "4": string[], "5": string[], … }
   let words: string[];

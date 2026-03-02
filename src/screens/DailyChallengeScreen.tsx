@@ -86,7 +86,7 @@ const DailyChallengeScreen: React.FC<DailyChallengeScreenProps> = ({
                 w-full flex items-center gap-4 p-5 rounded-2xl bg-surface/80 border-2
                 transition-all active:scale-[0.98]
                 ${accentClass}
-                ${!done ? 'animate-pulse-border hover:opacity-90' : 'opacity-70'}
+                ${!done ? 'hover:opacity-90' : 'opacity-70'}
               `}
             >
               <span className="text-3xl">{emoji}</span>
