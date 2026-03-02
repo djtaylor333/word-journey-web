@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[97367,["/word-journey-web/_next/static/chunks/2f236954d6a65e12.js"],"ViewportBoundary"]
+3:I[97367,["/word-journey-web/_next/static/chunks/2f236954d6a65e12.js"],"MetadataBoundary"]
+4:"$Sreact.suspense"
+5:I[27201,["/word-journey-web/_next/static/chunks/2f236954d6a65e12.js"],"IconMark"]
+0:{"buildId":"0YApsitmvEOmK1yVum6lT","rsc":["$","$1","h",{"children":[null,["$","$L2",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]}],["$","div",null,{"hidden":true,"children":["$","$L3",null,{"children":["$","$4",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"Word Journeys"}],["$","meta","1",{"name":"description","content":"Conquer the Lexicon - Word puzzle adventure game"}],["$","link","2",{"rel":"manifest","href":"/manifest.json"}],["$","link","3",{"rel":"icon","href":"/icon-192.png"}],["$","link","4",{"rel":"apple-touch-icon","href":"/icon-192.png"}],["$","$L5","5",{}]]}]}]}],null]}],"loading":null,"isPartial":false}
