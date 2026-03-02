@@ -159,6 +159,9 @@ export interface PlayerProgress {
 
   // VIP
   isVip: boolean;
+
+  // Developer mode (hidden; unlocked in Settings)
+  devModeEnabled: boolean;
 }
 
 // ─── Store ────────────────────────────────────────────────────────────────────

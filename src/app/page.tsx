@@ -161,7 +161,8 @@ export default function App() {
     return (
       <GameScreen
         difficulty={diff}
-        level={9999}
+        level={0}
+        isDailyChallenge={true}
         progress={progress}
         onProgressUpdate={p => {
           const len = current.wordLength as 4 | 5 | 6;

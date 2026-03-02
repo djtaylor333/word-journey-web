@@ -51,15 +51,91 @@ export async function getWordForLevel(
   return bucket[idx];
 }
 
-/** Deterministic daily word — same for all players on a given date */
-export async function getDailyWord(date: string, length: number): Promise<WordEntry> {
-  const bucket = await getWordsForLength(length);
-  if (bucket.length === 0) return { word: 'HELLO', definition: 'A greeting' };
-  // Create a hash from date string + length
-  let hash = 0;
-  const seed = `${date}-${length}`;
-  for (let i = 0; i < seed.length; i++) {
-    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+// ─── Daily Challenge — Android-parity seeding ────────────────────────────────
+/**
+ * Java-compatible LCG that mirrors java.util.Random exactly.
+ * Needed so every player (web & Android) gets the same daily word.
+ */
+function javaRandom(seedLong: bigint): (bound: number) => number {
+  const MULT = 0x5DEECE66Dn;
+  const ADD  = 0xBn;
+  const MASK = (1n << 48n) - 1n;
+  let state = (seedLong ^ MULT) & MASK;
+
+  function next(bits: number): number {
+    state = (state * MULT + ADD) & MASK;
+    return Number(state >> BigInt(48 - bits));
   }
-  return bucket[hash % bucket.length];
+
+  return function nextInt(bound: number): number {
+    if ((bound & -bound) === bound) {     // power of 2 fast path
+      return Number(BigInt(bound) * BigInt(next(31)) >> 31n);
+    }
+    let bits: number, val: number;
+    do { bits = next(31); val = bits % bound; }
+    while (bits - val + (bound - 1) < 0);
+    return val;
+  };
+}
+
+/**
+ * Matches Android's DailyChallengeRepository.computeDateSeed exactly:
+ *   datePart = DD * 1_000_000 + MM * 10_000 + YYYY
+ *   seed     = datePart + wordLength * 31
+ */
+function computeDateSeed(dateStr: string, wordLength: number): bigint {
+  const parts = dateStr.split('-');
+  const year  = BigInt(parseInt(parts[0]) || 2024);
+  const month = BigInt(parseInt(parts[1]) || 1);
+  const day   = BigInt(parseInt(parts[2]) || 1);
+  const datePart = day * 1_000_000n + month * 10_000n + year;
+  return datePart + BigInt(wordLength) * 31n;
+}
+
+// Cached daily pool: valid_words filtered/sorted, level words excluded
+let dailyPoolCache: Map<number, string[]> | null = null;
+
+async function loadDailyPool(): Promise<Map<number, string[]>> {
+  if (dailyPoolCache) return dailyPoolCache;
+
+  const [validData, wordData] = await Promise.all([
+    fetch(`${BASE_PATH}/data/valid_words.json`).then(r => r.json()),
+    fetch(`${BASE_PATH}/data/words.json`).then(r => r.json()),
+  ]);
+
+  // Collect all level words to exclude from daily pool (matches Android behaviour)
+  const levelWords = new Set<string>();
+  for (const bucket of Object.values(wordData as Record<string, { word: string }[]>)) {
+    for (const entry of bucket) levelWords.add(entry.word.toUpperCase());
+  }
+
+  // Build alphabetically-sorted pool per length (sort = determinism, matches Android)
+  const pool = new Map<number, string[]>();
+  for (const [lenKey, rawWords] of Object.entries(validData as Record<string, string[]>)) {
+    const len = parseInt(lenKey);
+    if (len === 4 || len === 5 || len === 6) {
+      const words = (rawWords as string[])
+        .map(w => w.toUpperCase())
+        .filter(w => !levelWords.has(w))
+        .sort();
+      pool.set(len, words);
+    }
+  }
+
+  dailyPoolCache = pool;
+  return pool;
+}
+
+/**
+ * Returns the daily challenge word for a given date + length.
+ * Algorithm is identical to Android's DailyChallengeRepository so both
+ * platforms serve the same word every day.
+ */
+export async function getDailyWord(date: string, length: number): Promise<WordEntry> {
+  const pool = await loadDailyPool();
+  const words = pool.get(length) ?? [];
+  if (words.length === 0) return { word: 'HELLO', definition: '' };
+  const seed  = computeDateSeed(date, length);
+  const idx   = javaRandom(seed)(words.length);
+  return { word: words[idx], definition: '' };
 }

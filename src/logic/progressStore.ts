@@ -81,6 +81,7 @@ export const DEFAULT_PROGRESS: PlayerProgress = {
   isNewPlayer: true,
   savedGameState: null,
   isVip: false,
+  devModeEnabled: false,
 };
 
 export function saveProgress(progress: PlayerProgress): void {
@@ -96,7 +97,15 @@ export function loadProgress(): PlayerProgress | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<PlayerProgress>;
     // Merge with defaults to fill in any fields added in new versions
-    return { ...DEFAULT_PROGRESS, ...parsed };
+    const merged = { ...DEFAULT_PROGRESS, ...parsed };
+    // Sanitize values that may have been corrupted by earlier bugs
+    // (e.g. the win-loop bug that fired handleWin thousands of times)
+    return {
+      ...merged,
+      lives:    Math.min(Math.max(0, merged.lives),    999),
+      coins:    Math.min(Math.max(0, merged.coins),    9_999_999),
+      diamonds: Math.min(Math.max(0, merged.diamonds), 9_999),
+    };
   } catch {
     return null;
   }

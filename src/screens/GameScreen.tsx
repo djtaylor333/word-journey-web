@@ -7,7 +7,7 @@ import {
   createInitialGameState, handleKeyPress, applyAddGuess,
   applyRemoveLetter, applyShowLetter,
 } from '../logic/gameEngine';
-import { getWordForLevel, loadValidWords } from '../logic/wordLoader';
+import { getWordForLevel, loadValidWords, getDailyWord } from '../logic/wordLoader';
 import { startRegenTimer, applyLivesRegen } from '../logic/livesRegen';
 import GameGrid from '../components/GameGrid';
 import GameKeyboard from '../components/GameKeyboard';
@@ -20,6 +20,7 @@ interface GameScreenProps {
   difficulty: Difficulty;
   level: number;
   isReplay?: boolean;
+  isDailyChallenge?: boolean;
   progress: PlayerProgress;
   onProgressUpdate: (p: PlayerProgress) => void;
   onNavigate: (s: Screen) => void;
@@ -27,7 +28,7 @@ interface GameScreenProps {
 }
 
 const GameScreen: React.FC<GameScreenProps> = ({
-  difficulty, level, isReplay = false,
+  difficulty, level, isReplay = false, isDailyChallenge = false,
   progress, onProgressUpdate, onNavigate, onBack,
 }) => {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -89,8 +90,11 @@ const GameScreen: React.FC<GameScreenProps> = ({
       }
 
       const wordLen = wordLengthForLevel(difficulty, level);
+      const today = new Date().toISOString().slice(0, 10);
       const [entry, vw] = await Promise.all([
-        getWordForLevel(wordLen, level),
+        isDailyChallenge
+          ? getDailyWord(today, wordLen)
+          : getWordForLevel(wordLen, level),
         loadValidWords(),
       ]);
 
@@ -276,7 +280,9 @@ const GameScreen: React.FC<GameScreenProps> = ({
         <div className="flex items-center gap-2 mb-1.5">
           <button onClick={onBack} className="text-onSurface/60 hover:text-onBg p-1 -ml-1 text-xl">←</button>
           <div className="flex-1 text-center">
-            <span className="font-bold text-onBg text-base">Level {level}</span>
+            <span className="font-bold text-onBg text-base">
+            {isDailyChallenge ? '📅 Daily Challenge' : `Level ${level}`}
+          </span>
             <span
               className="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full"
               style={{ backgroundColor: accent + '33', color: accent }}

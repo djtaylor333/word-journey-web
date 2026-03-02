@@ -1,7 +1,11 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import type { PlayerProgress } from '../logic/types';
 import LockOverlay from '../components/LockOverlay';
+import { resetProgress } from '../logic/progressStore';
+
+const APP_VERSION = '1.0.0';
+const UNLOCK_TAPS = 7; // tap version label this many times to unlock dev mode
 
 interface SettingsScreenProps {
   progress: PlayerProgress;
@@ -63,8 +67,18 @@ const TEXT_SCALES = [
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ progress, onProgress, onBack }) => {
   const [lockVisible, setLockVisible] = React.useState(false);
+  const [versionTaps, setVersionTaps] = useState(0);
 
   const update = (partial: Partial<PlayerProgress>) => onProgress({ ...progress, ...partial });
+
+  function handleVersionTap() {
+    const next = versionTaps + 1;
+    setVersionTaps(next);
+    if (!progress.devModeEnabled && next >= UNLOCK_TAPS) {
+      update({ devModeEnabled: true });
+      setVersionTaps(0);
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-bg">
@@ -167,7 +181,19 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ progress, onProgress, o
         {/* About */}
         <Section title="About">
           <div className="text-onSurface/60 text-xs space-y-1">
-            <div className="flex justify-between"><span>Version</span><span className="text-onBg">Web Preview</span></div>
+            <button
+              className="flex justify-between w-full py-1 active:opacity-60"
+              onClick={handleVersionTap}
+            >
+              <span>Version</span>
+              <span className="text-onBg font-mono">
+                {APP_VERSION}
+                {!progress.devModeEnabled && versionTaps > 0 && (
+                  <span className="text-accentHard ml-1">({UNLOCK_TAPS - versionTaps} more)</span>
+                )}
+                {progress.devModeEnabled && <span className="text-tileCorrect ml-1">[DEV]</span>}
+              </span>
+            </button>
             <div className="flex justify-between"><span>Android app</span>
               <a
                 href="https://play.google.com/store"
@@ -180,6 +206,67 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ progress, onProgress, o
             <p className="pt-2 text-onSurface/40">Get the full experience with VIP, cloud sync, and exclusive content on the Android app.</p>
           </div>
         </Section>
+
+        {/* Developer Panel — hidden until unlocked by tapping version 7 times */}
+        {progress.devModeEnabled && (
+          <Section title="🛠 Developer Mode">
+            <p className="text-accentHard text-xs mb-3">Internal testing only. These actions bypass normal game rules.</p>
+            <div className="space-y-2">
+              <button
+                onClick={() => update({ coins: progress.coins + 10_000 })}
+                className="w-full bg-coinGold/20 border border-coinGold/40 text-coinGold text-sm font-bold py-2.5 rounded-xl active:scale-95 transition-transform"
+              >
+                🪙 +10,000 Coins
+              </button>
+              <button
+                onClick={() => update({ diamonds: progress.diamonds + 100 })}
+                className="w-full bg-diamondBlue/20 border border-diamondBlue/40 text-diamondBlue text-sm font-bold py-2.5 rounded-xl active:scale-95 transition-transform"
+              >
+                💎 +100 Diamonds
+              </button>
+              <button
+                onClick={() => update({ lives: Math.min(progress.lives + 10, 999) })}
+                className="w-full bg-heartRed/20 border border-heartRed/40 text-heartRed text-sm font-bold py-2.5 rounded-xl active:scale-95 transition-transform"
+              >
+                ❤️ +10 Lives
+              </button>
+              <button
+                onClick={() => update({
+                  addGuessItems: progress.addGuessItems + 5,
+                  removeLetterItems: progress.removeLetterItems + 5,
+                  definitionItems: progress.definitionItems + 5,
+                  showLetterItems: progress.showLetterItems + 5,
+                })}
+                className="w-full bg-primary/20 border border-primary/40 text-primary text-sm font-bold py-2.5 rounded-xl active:scale-95 transition-transform"
+              >
+                ⚡ +5 All Power-ups
+              </button>
+              <button
+                onClick={() => update({ isVip: !progress.isVip })}
+                className="w-full bg-accentVip/20 border border-accentVip/40 text-accentVip text-sm font-bold py-2.5 rounded-xl active:scale-95 transition-transform"
+              >
+                👑 Toggle VIP ({progress.isVip ? 'ON' : 'OFF'})
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm('Reset ALL progress? This cannot be undone.')) {
+                    resetProgress();
+                    window.location.reload();
+                  }
+                }}
+                className="w-full bg-accentHard/20 border border-accentHard/40 text-accentHard text-sm font-bold py-2.5 rounded-xl active:scale-95 transition-transform"
+              >
+                🗑️ Reset All Progress
+              </button>
+              <button
+                onClick={() => update({ devModeEnabled: false })}
+                className="w-full bg-surface border border-borderFilled/30 text-onSurface/60 text-xs py-2 rounded-xl mt-1"
+              >
+                Disable Dev Mode
+              </button>
+            </div>
+          </Section>
+        )}
       </div>
 
       {lockVisible && (
