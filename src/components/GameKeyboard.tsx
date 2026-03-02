@@ -38,7 +38,7 @@ const GameKeyboard: React.FC<GameKeyboardProps> = ({
       if (disabled) return;
       const key = e.key.toUpperCase();
       if (/^[A-Z]$/.test(key)) onKeyPress(key);
-      if (e.key === 'Backspace' || e.key === 'Delete') onKeyPress('DEL');
+      if (e.key === 'Backspace' || e.key === 'Delete') onKeyPress('BACKSPACE');
       if (e.key === 'Enter') onKeyPress('ENTER');
     };
     window.addEventListener('keydown', handler);

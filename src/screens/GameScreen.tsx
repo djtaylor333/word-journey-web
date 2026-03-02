@@ -39,6 +39,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
   const [msUntilNext, setMsUntilNext] = useState(0);
   const lifeSpent = useRef(false);
   const gameLoadedRef = useRef(false);  // true once a GameState has been set
+  const winHandledRef = useRef(false);  // prevent handleWin firing more than once
 
   // ── Serialise/deserialise GameState (Set + Map aren't JSON-safe) ──────────
   const saveKey = `${difficulty}-${level}`;
@@ -138,6 +139,16 @@ const GameScreen: React.FC<GameScreenProps> = ({
     }, 1000);
     return () => clearInterval(interval);
   }, [msUntilNext]);
+
+  // Fire handleWin exactly once when status flips to WON
+  useEffect(() => {
+    if (gameState?.status === 'WON' && !winHandledRef.current) {
+      winHandledRef.current = true;
+      handleWin();
+    }
+  // handleWin reads progress via closure; status is the only trigger needed
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState?.status]);
 
   const onKey = useCallback((key: string) => {
     if (!gameState) return;
@@ -382,7 +393,6 @@ const GameScreen: React.FC<GameScreenProps> = ({
       )}
 
       {/* Win dialog */}
-      {gameState.status === 'WON' && (() => { handleWin(); return null; })()}
       {gameState.status === 'WON' && (
         <WinDialog
           difficulty={difficulty}

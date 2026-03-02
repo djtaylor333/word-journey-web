@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import type { Screen, Difficulty } from '../logic/types';
 import type { PlayerProgress } from '../logic/types';
-import { DEFAULT_PROGRESS, loadProgress, saveProgress, applyLoginStreak, applyDailyReset, applyNewPlayerBonus } from '../logic/progressStore';
+import { DEFAULT_PROGRESS, loadProgress, saveProgress, applyLoginStreak, applyDailyReset, applyNewPlayerBonus, getOrCreatePlayerId } from '../logic/progressStore';
 import { applyLivesRegen, startRegenTimer } from '../logic/livesRegen';
 
 import HomeScreen        from '../screens/HomeScreen';
@@ -30,6 +30,7 @@ export default function App() {
 
   /* ─── Initialise progress from localStorage ───────────────────────────── */
   useEffect(() => {
+    getOrCreatePlayerId(); // ensure a stable player ID exists for future Google sync
     let p = loadProgress() ?? DEFAULT_PROGRESS;
     p = applyNewPlayerBonus(p);  // one-time welcome bonus on first launch
     p = applyLoginStreak(p);
@@ -49,6 +50,18 @@ export default function App() {
   /* ─── Persist on every progress change ───────────────────────────────── */
   useEffect(() => {
     if (ready) saveProgress(progress);
+  }, [progress, ready]);
+
+  /* ─── Save on tab hide / close (belt-and-suspenders) ─────────────────── */
+  useEffect(() => {
+    if (!ready) return;
+    const handleHide = () => saveProgress(progress);
+    document.addEventListener('visibilitychange', handleHide);
+    window.addEventListener('beforeunload', handleHide);
+    return () => {
+      document.removeEventListener('visibilitychange', handleHide);
+      window.removeEventListener('beforeunload', handleHide);
+    };
   }, [progress, ready]);
 
   /* ─── Lives regen timer ────────────────────────────────────────────────── */

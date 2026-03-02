@@ -1,6 +1,25 @@
 import type { PlayerProgress } from './types';
 
 const STORAGE_KEY = 'word-journeys-progress';
+const PLAYER_ID_KEY = 'word-journeys-player-id';
+
+/**
+ * Returns a stable UUID that identifies this browser/device.
+ * Created on first visit, persisted in localStorage forever.
+ * Safe to use as a future Google OAuth linkage key.
+ */
+export function getOrCreatePlayerId(): string {
+  if (typeof window === 'undefined') return '';
+  let id = localStorage.getItem(PLAYER_ID_KEY);
+  if (!id) {
+    // crypto.randomUUID is available in all modern browsers
+    id = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(PLAYER_ID_KEY, id);
+  }
+  return id;
+}
 
 export const DEFAULT_PROGRESS: PlayerProgress = {
   coins: 100,
