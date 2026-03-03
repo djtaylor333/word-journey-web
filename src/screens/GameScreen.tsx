@@ -362,7 +362,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
   }
 
   return (
-    <div className="h-dvh bg-bg flex flex-col overflow-hidden">
+    <div className="h-dvh bg-bg flex flex-col overflow-hidden max-w-2xl mx-auto">
       {/* VIP shimmer overlay */}
       {isVip && <div className="vip-shimmer fixed inset-0 z-0 pointer-events-none" />}
 
@@ -370,13 +370,13 @@ const GameScreen: React.FC<GameScreenProps> = ({
       <div className="relative z-10 px-4 pt-safe pt-3 pb-2">
         {/* Row 1 */}
         <div className="flex items-center gap-2 mb-1.5">
-          <button onClick={onBack} className="text-onSurface/60 hover:text-onBg p-1 -ml-1 text-xl">←</button>
+          <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-2xl p-3 rounded-xl hover:bg-surface/80 active:scale-90 transition-all">←</button>
           <div className="flex-1 text-center">
-            <span className="font-bold text-onBg text-base">
+            <span className="font-bold text-onBg text-lg">
             {isDailyChallenge ? '📅 Daily Challenge' : `Level ${level}`}
           </span>
             <span
-              className="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full"
+              className="ml-2 text-sm font-semibold px-2.5 py-0.5 rounded-full"
               style={{ backgroundColor: accent + '33', color: accent }}
             >
               {DIFFICULTY_LABELS[difficulty]}

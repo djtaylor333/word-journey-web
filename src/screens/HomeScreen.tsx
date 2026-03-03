@@ -34,7 +34,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
   const needsDaily = !allDailyDone;
 
   return (
-    <div className="min-h-screen bg-bg flex flex-col">
+    <div className="min-h-screen bg-bg flex flex-col max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-safe pt-4 pb-3">
         <div className="flex items-center gap-3">
@@ -70,31 +70,31 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
           {/* Compass ring */}
           <div className="absolute inset-0 rounded-full border-2 border-primary/50 animate-compass-spin" style={{ margin: '-8px' }} />
           {/* 2×2 letter grid */}
-          <div className="grid grid-cols-2 gap-1.5 p-3 rounded-2xl bg-surface border border-borderFilled shadow-2xl">
+          <div className="grid grid-cols-2 gap-2 p-4 rounded-2xl bg-surface border border-borderFilled shadow-2xl">
             {[
               { l: 'W', c: 'bg-tileCorrect' },
               { l: 'J', c: 'bg-tilePresent' },
               { l: '?', c: 'bg-tileAbsent' },
               { l: '!', c: 'bg-tilePresent' },
             ].map(({ l, c }, i) => (
-              <div key={i} className={`w-12 h-12 flex items-center justify-center rounded font-bold text-xl text-white ${c}`}>
+              <div key={i} className={`w-16 h-16 flex items-center justify-center rounded-lg font-bold text-2xl text-white ${c}`}>
                 {l}
               </div>
             ))}
           </div>
         </div>
-        <h1 className="text-3xl font-bold text-onBg" style={{ fontFamily: 'Georgia, serif' }}>
+        <h1 className="text-4xl font-bold text-onBg" style={{ fontFamily: 'Georgia, serif' }}>
           Word Journeys
         </h1>
-        <p className="text-primary text-sm font-medium mt-1">Conquer the Lexicon</p>
+        <p className="text-primary text-base font-medium mt-1">Conquer the Lexicon</p>
       </div>
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-4 pb-safe pb-8 space-y-5">
         {/* Adventure section */}
         <section>
-          <h2 className="text-onSurface/70 text-xs font-bold uppercase tracking-widest mb-3">🗺️ Adventure</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <h2 className="text-onSurface/70 text-sm font-bold uppercase tracking-widest mb-3">🗺️ Adventure</h2>
+          <div className="grid grid-cols-2 gap-4">
             {diffCards.map(({ d, emoji, desc }) => {
               const accent = DIFFICULTY_ACCENT[d];
               const lv = levelFor(d);
@@ -106,7 +106,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
                     if (isVip && !progress.isVip) { setShowVipLock(true); return; }
                     onNavigate({ name: 'levelSelect', difficulty: d });
                   }}
-                  className="relative flex flex-col items-center p-4 rounded-2xl bg-surface border border-borderFilled/50 hover:border-primary/40 transition-all active:scale-95 overflow-hidden"
+                  className="relative flex flex-col items-center p-5 rounded-2xl bg-surface border border-borderFilled/50 hover:border-primary/40 transition-all active:scale-95 overflow-hidden"
                   style={{ borderColor: accent + '30' }}
                 >
                   {isVip && !progress.isVip && (
@@ -114,8 +114,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
                       VIP
                     </div>
                   )}
-                  <span className="text-2xl mb-1 animate-float">{emoji}</span>
-                  <span className="font-bold text-sm" style={{ color: accent }}>
+                  <span className="text-3xl mb-1.5 animate-float">{emoji}</span>
+                  <span className="font-bold text-base" style={{ color: accent }}>
                     {DIFFICULTY_LABELS[d]}
                   </span>
                   <span className="text-onSurface/50 text-xs">{desc}</span>
@@ -128,17 +128,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
 
         {/* Daily Challenge */}
         <section>
-          <h2 className="text-onSurface/70 text-xs font-bold uppercase tracking-widest mb-3">📅 Daily Challenge</h2>
+          <h2 className="text-onSurface/70 text-sm font-bold uppercase tracking-widest mb-3">📅 Daily Challenge</h2>
           <button
             onClick={() => onNavigate({ name: 'dailyChallenge' })}
-            className={`w-full flex items-center gap-4 p-4 rounded-2xl bg-surface border transition-all active:scale-[0.98] ${
+            className={`w-full flex items-center gap-4 p-5 rounded-2xl bg-surface border transition-all active:scale-[0.98] ${
               needsDaily ? 'border-accentRegular/50' : 'border-borderFilled/50'
             }`}
           >
-            <span className="text-3xl">📅</span>
+            <span className="text-4xl">📅</span>
             <div className="flex-1 text-left">
-              <div className="font-bold text-onBg text-sm">Daily Challenge</div>
-              <div className="text-onSurface/60 text-xs">3 new words every day / 4, 5, and 6 letters</div>
+              <div className="font-bold text-onBg text-base">Daily Challenge</div>
+              <div className="text-onSurface/60 text-sm">3 new words every day / 4, 5, and 6 letters</div>
               {progress.dailyStreak > 0 && (
                 <div className="text-accentHard text-xs font-bold mt-0.5">🔥 {progress.dailyStreak} day streak</div>
               )}
@@ -150,15 +150,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
 
         {/* Timer Mode */}
         <section>
-          <h2 className="text-onSurface/70 text-xs font-bold uppercase tracking-widest mb-3">⏱️ Timer Mode</h2>
+          <h2 className="text-onSurface/70 text-sm font-bold uppercase tracking-widest mb-3">⏱️ Timer Mode</h2>
           <button
             onClick={() => onNavigate({ name: 'timerMode' })}
-            className="w-full flex items-center gap-4 p-4 rounded-2xl bg-surface border border-borderFilled/50 hover:border-accentHard/40 transition-all active:scale-[0.98]"
+            className="w-full flex items-center gap-4 p-5 rounded-2xl bg-surface border border-borderFilled/50 hover:border-accentHard/40 transition-all active:scale-[0.98]"
           >
-            <span className="text-3xl">⏱️</span>
+            <span className="text-4xl">⏱️</span>
             <div className="flex-1 text-left">
-              <div className="font-bold text-onBg text-sm">Timer Mode</div>
-              <div className="text-onSurface/60 text-xs">Solve as many words as you can before time runs out</div>
+              <div className="font-bold text-onBg text-base">Timer Mode</div>
+              <div className="text-onSurface/60 text-sm">Solve as many words as you can before time runs out</div>
             </div>
             <span className="text-onSurface/40">▶</span>
           </button>
@@ -166,7 +166,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
 
         {/* Streak Rewards reference */}
         <section>
-          <h2 className="text-onSurface/70 text-xs font-bold uppercase tracking-widest mb-3">🎁 Streak Rewards</h2>
+          <h2 className="text-onSurface/70 text-sm font-bold uppercase tracking-widest mb-3">🎁 Streak Rewards</h2>
           <div className="bg-surface border border-borderFilled/30 rounded-2xl p-4 space-y-1.5 text-sm">
             {[
               ['3 days', '🪙 +100 bonus coins'],

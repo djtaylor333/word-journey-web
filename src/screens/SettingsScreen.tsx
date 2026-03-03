@@ -4,7 +4,7 @@ import type { PlayerProgress } from '../logic/types';
 import LockOverlay from '../components/LockOverlay';
 import { resetProgress, saveProgress, DEFAULT_PROGRESS } from '../logic/progressStore';
 
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.0';
 const UNLOCK_TAPS = 7; // tap version label this many times to unlock dev mode
 
 interface SettingsScreenProps {
@@ -83,11 +83,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ progress, onProgress, o
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg">
+    <div className="min-h-screen flex flex-col bg-bg max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-        <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-xl p-1">←</button>
-        <h1 className="flex-1 text-center font-bold text-onBg text-lg">⚙️ Settings</h1>
+        <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-2xl p-3 rounded-xl hover:bg-surface/80 active:scale-90 transition-all">←</button>
+        <h1 className="flex-1 text-center font-bold text-onBg text-xl">⚙️ Settings</h1>
         <div className="w-8" />
       </div>
 

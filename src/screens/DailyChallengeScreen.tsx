@@ -51,28 +51,28 @@ const DailyChallengeScreen: React.FC<DailyChallengeScreenProps> = ({
       style={{ background: 'linear-gradient(135deg, #1A0533, #0D1B2A)' }}
     >
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 pt-safe pt-4 pb-3">
-        <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-xl p-1">←</button>
-        <h1 className="flex-1 text-center font-bold text-onBg text-lg">📅 Daily Challenge</h1>
-        <div className="w-8" />
+      <div className="flex items-center gap-3 px-4 pt-safe pt-4 pb-3 max-w-2xl mx-auto w-full">
+        <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-2xl p-3 rounded-xl hover:bg-white/10 active:scale-90 transition-all">←</button>
+        <h1 className="flex-1 text-center font-bold text-onBg text-xl">📅 Daily Challenge</h1>
+        <div className="w-12" />
       </div>
 
       {/* Streak banner */}
-      <div className="flex justify-around px-6 pb-4">
+      <div className="flex justify-around px-6 pb-5 max-w-2xl mx-auto w-full">
         {[
           { label: '🔥 Streak', val: progress.dailyStreak },
           { label: '⭐ Best',   val: progress.dailyBestStreak },
           { label: '🏆 Wins',  val: progress.totalDailyChallengesCompleted },
         ].map(({ label, val }) => (
           <div key={label} className="text-center">
-            <div className="text-xl font-bold text-onBg">{val}</div>
-            <div className="text-xs text-onSurface/60">{label}</div>
+            <div className="text-2xl font-bold text-onBg">{val}</div>
+            <div className="text-sm text-onSurface/60">{label}</div>
           </div>
         ))}
       </div>
 
       {/* Challenge cards */}
-      <div className="flex-1 px-4 space-y-4 pb-safe pb-8">
+      <div className="flex-1 px-4 space-y-4 pb-safe pb-8 max-w-2xl mx-auto w-full">
         {DAILY_LENGTHS.map(({ len, emoji, label, accentClass }) => {
           const done = isCompleted(len);
           const stars = getStars(len);
@@ -84,15 +84,15 @@ const DailyChallengeScreen: React.FC<DailyChallengeScreenProps> = ({
               onClick={() => !done && onNavigate({ name: 'dailyGame', wordLength: len })}
               disabled={done}
               className={`
-                w-full flex items-center gap-4 p-5 rounded-2xl bg-surface/80 border-2
+                w-full flex items-center gap-5 p-6 rounded-2xl bg-surface/80 border-2
                 transition-all active:scale-[0.98]
                 ${accentClass}
                 ${!done ? 'hover:opacity-90' : 'opacity-70'}
               `}
             >
-              <span className="text-3xl">{emoji}</span>
+              <span className="text-4xl">{emoji}</span>
               <div className="flex-1 text-left">
-                <div className="font-bold text-onBg">{label} — {len} letters</div>
+                <div className="font-bold text-onBg text-lg">{label} — {len} letters</div>
                 {done ? (
                   <div className="flex gap-0.5 mt-1">
                     {[1,2,3].map(s => (

@@ -113,11 +113,17 @@ export default function App() {
   }, [progress.lives, progress.lastLifeRegenTimestamp, ready]);
 
   /* ─── Navigation helpers ───────────────────────────────────────────────── */
-  function navigate(s: Screen) { setScreenStack(stack => [...stack, s]); }
+  function navigate(s: Screen) {
+    // Push a browser history entry so each screen adds a back-step
+    if (typeof window !== 'undefined') window.history.pushState(null, '');
+    setScreenStack(stack => [...stack, s]);
+  }
   function goBack() {
     setScreenStack(stack => stack.length > 1 ? stack.slice(0, -1) : stack);
   }
-  function navigateHome() { setScreenStack([{ name: 'home' }]); }
+  function navigateHome() {
+    setScreenStack([{ name: 'home' }]);
+  }
 
   const current = screenStack[screenStack.length - 1];
 

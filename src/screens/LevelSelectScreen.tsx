@@ -46,8 +46,8 @@ const LevelSelectScreen: React.FC<LevelSelectScreenProps> = ({
       {isVip && <div className="vip-shimmer fixed inset-0 z-0 pointer-events-none" />}
 
       {/* Header */}
-      <div className="relative z-10 flex items-center gap-3 px-4 pt-safe pt-4 pb-3">
-        <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-xl p-1">←</button>
+      <div className="relative z-10 flex items-center gap-3 px-4 pt-safe pt-4 pb-3 max-w-2xl mx-auto w-full">
+        <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-2xl p-3 rounded-xl hover:bg-black/20 active:scale-90 transition-all">←</button>
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <span className="text-2xl">{zone.emoji}</span>
@@ -61,7 +61,8 @@ const LevelSelectScreen: React.FC<LevelSelectScreenProps> = ({
       </div>
 
       {/* Level grid */}
-      <div ref={scrollContainerRef} className="relative z-10 flex-1 overflow-y-auto px-4 pb-safe pb-8">
+      <div ref={scrollContainerRef} className="relative z-10 flex-1 overflow-y-auto pb-safe pb-8">
+        <div className="max-w-2xl mx-auto px-4">
         <div className="flex flex-col items-center gap-0">
           {Array.from({ length: totalLevels }, (_, i) => i + 1).map(lv => {
             const isCompleted = lv < currentLevel;
@@ -85,8 +86,8 @@ const LevelSelectScreen: React.FC<LevelSelectScreenProps> = ({
                   disabled={isLocked}
                   onClick={() => !isLocked && onNavigate({ name: 'game', difficulty, level: lv })}
                   className={`
-                    w-16 h-16 rounded-full flex flex-col items-center justify-center
-                    font-bold text-sm shadow-lg transition-all active:scale-90
+                    w-20 h-20 rounded-full flex flex-col items-center justify-center
+                    font-bold text-base shadow-lg transition-all active:scale-90
                     ${isCurrent
                       ? 'scale-125 shadow-xl ring-4'
                       : isCompleted
@@ -137,6 +138,7 @@ const LevelSelectScreen: React.FC<LevelSelectScreenProps> = ({
           }
         </button>
       </div>
+        </div>
     </div>
   );
 };

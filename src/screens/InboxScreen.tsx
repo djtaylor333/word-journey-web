@@ -40,11 +40,11 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ progress, onProgress, onBack 
     new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
   return (
-    <div className="min-h-screen bg-bg flex flex-col">
+    <div className="min-h-screen bg-bg flex flex-col max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-safe pt-4 pb-3 border-b border-borderFilled/20">
-        <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-xl p-1">←</button>
-        <h1 className="flex-1 text-center font-bold text-onBg text-lg">📬 Inbox</h1>
+        <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-2xl p-3 rounded-xl hover:bg-surface/80 active:scale-90 transition-all">←</button>
+        <h1 className="flex-1 text-center font-bold text-onBg text-xl">📬 Inbox</h1>
         {unclaimed.length > 0 && (
           <button
             onClick={handleClaimAll}

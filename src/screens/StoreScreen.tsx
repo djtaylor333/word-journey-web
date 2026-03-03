@@ -50,11 +50,11 @@ const StoreScreen: React.FC<StoreScreenProps> = ({ progress, onProgress, onBack 
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg">
+    <div className="min-h-screen flex flex-col bg-bg max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-2">
-        <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-xl p-1">←</button>
-        <h1 className="flex-1 text-center font-bold text-onBg text-lg">🏪 Store</h1>
+        <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-2xl p-3 rounded-xl hover:bg-surface/80 active:scale-90 transition-all">←</button>
+        <h1 className="flex-1 text-center font-bold text-onBg text-xl">🏪 Store</h1>
         <div className="flex items-center gap-2 text-sm">
           <span className="text-coinGold font-bold">🪙 {progress.coins.toLocaleString()}</span>
           <span className="text-diamondBlue font-bold">💎 {progress.diamonds}</span>
