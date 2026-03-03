@@ -4,7 +4,7 @@ import type { PlayerProgress } from '../logic/types';
 import LockOverlay from '../components/LockOverlay';
 import { resetProgress, saveProgress, DEFAULT_PROGRESS } from '../logic/progressStore';
 
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.3.0';
 const UNLOCK_TAPS = 7; // tap version label this many times to unlock dev mode
 
 interface SettingsScreenProps {
