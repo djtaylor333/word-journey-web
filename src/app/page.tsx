@@ -170,20 +170,7 @@ export default function App() {
         level={0}
         isDailyChallenge={true}
         progress={progress}
-        onProgressUpdate={p => {
-          const len = current.wordLength as 4 | 5 | 6;
-          const field = len === 4 ? 'dailyCompleted4' : len === 5 ? 'dailyCompleted5' : 'dailyCompleted6';
-          const streakField = len === 4 ? 'dailyStreak4' : len === 5 ? 'dailyStreak5' : 'dailyStreak6';
-          const bestField = len === 4 ? 'dailyBestStreak4' : len === 5 ? 'dailyBestStreak5' : 'dailyBestStreak6';
-          const newStreak = (p[streakField] ?? 0) + 1;
-          setProgress({
-            ...p,
-            [field]: true,
-            dailyLastDate: new Date().toISOString().slice(0, 10),
-            [streakField]: newStreak,
-            [bestField]: Math.max(p[bestField] ?? 0, newStreak),
-          });
-        }}
+        onProgressUpdate={p => setProgress(p)}
         onNavigate={(s) => { if (s.name === 'home') return navigateHome(); navigate(s); }}
         onBack={goBack}
       />

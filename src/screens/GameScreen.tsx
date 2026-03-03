@@ -9,6 +9,7 @@ import {
 } from '../logic/gameEngine';
 import { getWordForLevel, loadValidWords, getDailyWord } from '../logic/wordLoader';
 import { startRegenTimer, applyLivesRegen } from '../logic/livesRegen';
+import { localDateStr } from '../logic/progressStore';
 import { SoundManager } from '../logic/soundManager';
 import GameGrid from '../components/GameGrid';
 import GameKeyboard from '../components/GameKeyboard';
@@ -72,6 +73,8 @@ const GameScreen: React.FC<GameScreenProps> = ({
   useEffect(() => {
     // Don't run until a game has been fully loaded
     if (!gameLoadedRef.current) return;
+    // Daily challenges don't use savedGameState (1 attempt per day — no resume needed)
+    if (isDailyChallenge) return;
 
     if (!gameState || isReplay || gameState.status !== 'IN_PROGRESS') {
       // Clear save when game ends or in replay
@@ -226,7 +229,20 @@ const GameScreen: React.FC<GameScreenProps> = ({
     const { coinsEarned, starsEarned } = gameState;
 
     if (isDailyChallenge) {
-      // Daily challenge: update coins/stars/totalWins only — do NOT touch level progression
+      // Map difficulty to daily word length
+      const lenMap: Record<string, 4|5|6> = { easy: 4, regular: 5, hard: 6, vip: 6 };
+      const wordLen = lenMap[difficulty] ?? 5;
+      const field      = wordLen === 4 ? 'dailyCompleted4' : wordLen === 5 ? 'dailyCompleted5' : 'dailyCompleted6';
+      const streakField = wordLen === 4 ? 'dailyStreak4'    : wordLen === 5 ? 'dailyStreak5'    : 'dailyStreak6';
+      const bestField   = wordLen === 4 ? 'dailyBestStreak4': wordLen === 5 ? 'dailyBestStreak5': 'dailyBestStreak6';
+      const starsField  = wordLen === 4 ? 'dailyStars4'     : wordLen === 5 ? 'dailyStars5'     : 'dailyStars6';
+      const today = localDateStr();
+      // Guard: only mark complete / increment streak once per day
+      const alreadyDone = progress[field as keyof PlayerProgress] as boolean;
+      const prevStreak  = (progress[streakField as keyof PlayerProgress] as number) ?? 0;
+      const newStreak   = alreadyDone ? prevStreak : prevStreak + 1;
+      const prevBest    = (progress[bestField as keyof PlayerProgress] as number) ?? 0;
+      const prevStars   = (progress[starsField as keyof PlayerProgress] as number) ?? 0;
       const updated: PlayerProgress = {
         ...progress,
         coins: progress.coins + coinsEarned,
@@ -234,6 +250,11 @@ const GameScreen: React.FC<GameScreenProps> = ({
         totalDailyChallengesCompleted: progress.totalDailyChallengesCompleted + 1,
         totalGuesses: progress.totalGuesses + gameState.completedGuesses.length,
         savedGameState: null,
+        [field]: true,
+        dailyLastDate: today,
+        [streakField]: newStreak,
+        [bestField]: Math.max(prevBest, newStreak),
+        [starsField]: Math.max(prevStars, starsEarned),
       };
       onProgressUpdate(updated);
       return;
@@ -363,7 +384,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
       </div>
 
       {/* Game area */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center gap-4 px-4 py-2">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center gap-2 px-4 py-1">
         <GameGrid gameState={gameState} highContrast={progress.highContrast} />
         <ItemsBar
           addGuessItems={progress.addGuessItems}
@@ -381,7 +402,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
       </div>
 
       {/* Keyboard */}
-      <div className="relative z-10 px-2 pb-safe pb-4">
+      <div className="relative z-10 px-1 pb-safe pb-2">
         <GameKeyboard
           keyStates={gameState.keyStates}
           removedLetters={gameState.removedLetters}

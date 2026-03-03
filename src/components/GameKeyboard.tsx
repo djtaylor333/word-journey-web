@@ -61,8 +61,8 @@ const GameKeyboard: React.FC<GameKeyboardProps> = ({
                 disabled={disabled || removed}
                 onClick={() => !disabled && !removed && onKeyPress(key === 'DEL' ? 'BACKSPACE' : key)}
                 className={`
-                  ${isAction ? 'px-2 sm:px-3 text-xs sm:text-sm font-bold' : 'w-8 sm:w-9 text-base sm:text-lg font-bold'}
-                  h-12 sm:h-14
+                  ${isAction ? 'px-3 sm:px-4 text-sm sm:text-base font-bold' : 'w-9 sm:w-11 text-lg sm:text-xl font-bold'}
+                  h-14 sm:h-16
                   rounded
                   flex items-center justify-center
                   transition-colors duration-200
