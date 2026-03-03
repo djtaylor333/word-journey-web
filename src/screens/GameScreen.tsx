@@ -40,10 +40,20 @@ const GameScreen: React.FC<GameScreenProps> = ({
   const [definitionUsed, setDefinitionUsed] = useState(false);
   const [showDefinition, setShowDefinition] = useState(false);
   const [msUntilNext, setMsUntilNext] = useState(0);
+  // Compact mode: shrink tiles/keyboard when screen height < 700px
+  const [compact, setCompact] = useState(false);
   const lifeSpent = useRef(false);
   const gameLoadedRef = useRef(false);  // true once a GameState has been set
   const winHandledRef = useRef(false);  // prevent handleWin firing more than once
   const loseHandledRef = useRef(false); // prevent lose sound firing more than once
+
+  // Detect compact screen height
+  useEffect(() => {
+    const update = () => setCompact(window.innerHeight < 700);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
 
   // Sync SoundManager config whenever audio settings change
   useEffect(() => {
@@ -366,46 +376,68 @@ const GameScreen: React.FC<GameScreenProps> = ({
       {/* VIP shimmer overlay */}
       {isVip && <div className="vip-shimmer fixed inset-0 z-0 pointer-events-none" />}
 
-      {/* Top bar */}
-      <div className="relative z-10 px-4 pt-safe pt-3 pb-2">
-        {/* Row 1 */}
-        <div className="flex items-center gap-2 mb-1.5">
-          <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-2xl p-3 rounded-xl hover:bg-surface/80 active:scale-90 transition-all">←</button>
-          <div className="flex-1 text-center">
-            <span className="font-bold text-onBg text-lg">
-            {isDailyChallenge ? '📅 Daily Challenge' : `Level ${level}`}
-          </span>
+      {/* Top bar — single compact row on small screens, two rows otherwise */}
+      <div className={`relative z-10 px-4 ${compact ? 'pt-2 pb-1' : 'pt-safe pt-3 pb-2'}`}>
+        {compact ? (
+          /* Compact: single row with level, difficulty, lives, coins */
+          <div className="flex items-center gap-2">
+            <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-xl p-2 rounded-lg hover:bg-surface/80 active:scale-90 transition-all">←</button>
+            <span className="font-bold text-onBg text-sm">
+              {isDailyChallenge ? '📅 Daily' : `Lvl ${level}`}
+            </span>
             <span
-              className="ml-2 text-sm font-semibold px-2.5 py-0.5 rounded-full"
+              className="text-xs font-semibold px-2 py-0.5 rounded-full"
               style={{ backgroundColor: accent + '33', color: accent }}
             >
               {DIFFICULTY_LABELS[difficulty]}
             </span>
+            <div className="flex-1" />
+            <span className="text-coinGold text-xs font-semibold">🪙 {progress.coins.toLocaleString()}</span>
+            <span className="text-heartRed text-xs">❤️ {Math.min(progress.lives, 10)}</span>
+            <button onClick={() => onNavigate({ name: 'store' })} className="text-onSurface/60 hover:text-onBg text-sm">🛒</button>
           </div>
-          <div className="flex items-center gap-1 text-sm">
-            <span className="text-heartRed">❤️</span>
-            <span className="text-onSurface font-bold">{Math.min(progress.lives, 10)}</span>
-            {progress.lives > 10 && (
-              <span className="text-bonusBlue font-bold text-xs">+{progress.lives - 10}</span>
+        ) : (
+          <>
+            {/* Row 1 */}
+            <div className="flex items-center gap-2 mb-1.5">
+              <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-2xl p-3 rounded-xl hover:bg-surface/80 active:scale-90 transition-all">←</button>
+              <div className="flex-1 text-center">
+                <span className="font-bold text-onBg text-lg">
+                  {isDailyChallenge ? '📅 Daily Challenge' : `Level ${level}`}
+                </span>
+                <span
+                  className="ml-2 text-sm font-semibold px-2.5 py-0.5 rounded-full"
+                  style={{ backgroundColor: accent + '33', color: accent }}
+                >
+                  {DIFFICULTY_LABELS[difficulty]}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 text-sm">
+                <span className="text-heartRed">❤️</span>
+                <span className="text-onSurface font-bold">{Math.min(progress.lives, 10)}</span>
+                {progress.lives > 10 && (
+                  <span className="text-bonusBlue font-bold text-xs">+{progress.lives - 10}</span>
+                )}
+              </div>
+            </div>
+            {/* Row 2 */}
+            <div className="flex items-center justify-center gap-4 text-sm">
+              <span className="text-coinGold font-semibold">🪙 {progress.coins.toLocaleString()}</span>
+              <span className="text-diamondCyan font-semibold">💎 {progress.diamonds}</span>
+              <button onClick={() => onNavigate({ name: 'store' })} className="text-onSurface/60 hover:text-onBg">🛒</button>
+            </div>
+            {isReplay && (
+              <div className="text-center text-xs text-primary/70 mt-1">
+                🔄 Replay — No rewards or life cost
+              </div>
             )}
-          </div>
-        </div>
-        {/* Row 2 */}
-        <div className="flex items-center justify-center gap-4 text-sm">
-          <span className="text-coinGold font-semibold">🪙 {progress.coins.toLocaleString()}</span>
-          <span className="text-diamondCyan font-semibold">💎 {progress.diamonds}</span>
-          <button onClick={() => onNavigate({ name: 'store' })} className="text-onSurface/60 hover:text-onBg">🛒</button>
-        </div>
-        {isReplay && (
-          <div className="text-center text-xs text-primary/70 mt-1">
-            🔄 Replay — No rewards or life cost
-          </div>
+          </>
         )}
       </div>
 
       {/* Game area */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-start gap-2 px-4 pt-1 min-h-0">
-        <GameGrid gameState={gameState} highContrast={progress.highContrast} />
+      <div className={`relative z-10 flex-1 flex flex-col items-center justify-center min-h-0 ${compact ? 'gap-1 px-2 py-1' : 'gap-2 px-4 pt-1'}`}>
+        <GameGrid gameState={gameState} highContrast={progress.highContrast} compact={compact} />
         <ItemsBar
           addGuessItems={progress.addGuessItems}
           removeLetterItems={progress.removeLetterItems}
@@ -418,16 +450,18 @@ const GameScreen: React.FC<GameScreenProps> = ({
           definitionUsed={definitionUsed}
           hasDefinition={!!(gameState.definition)}
           disabled={gameState.status !== 'IN_PROGRESS' && gameState.status !== 'OUT_OF_GUESSES'}
+          compact={compact}
         />
       </div>
 
       {/* Keyboard */}
-      <div className="relative z-10 px-1 pb-safe pb-2">
+      <div className={`relative z-10 ${compact ? 'px-1 pb-1' : 'px-1 pb-safe pb-2'}`}>
         <GameKeyboard
           keyStates={gameState.keyStates}
           removedLetters={gameState.removedLetters}
           onKeyPress={onKey}
           disabled={gameState.status !== 'IN_PROGRESS' || showRemovePicker}
+          compact={compact}
         />
       </div>
 
@@ -443,6 +477,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
               removedLetters={gameState.removedLetters}
               onKeyPress={onKey}
               disabled={false}
+              compact={compact}
             />
             <button
               onClick={() => setShowRemovePicker(false)}

@@ -463,3 +463,62 @@ test('screens are constrained to max-width on wide viewports', async ({ page }) 
     expect(box.width).toBeLessThanOrEqual(700); // max-w-2xl is 672px
   }
 });
+
+// ───────────────────────────────────────────────────────────────────────────
+// 23. Level select shows zone banners (winding path)
+// ───────────────────────────────────────────────────────────────────────────
+test('level select shows zone name banner', async ({ page }) => {
+  await setupProgress(page);
+  await goto(page);
+  await page.getByText('Easy').first().click();
+  // Zone banner for zone 1 (levels 1-10) should be visible
+  await expect(page.getByText('Enchanted Meadow')).toBeVisible({ timeout: 5000 });
+  // lvl range text visible  
+  await expect(page.getByText(/lvl 1/i)).toBeVisible({ timeout: 3000 });
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// 24. Level select nodes are at different horizontal positions (winding path)
+// ───────────────────────────────────────────────────────────────────────────
+test('level select path has nodes at different horizontal positions', async ({ page }) => {
+  await setupProgress(page, { easyLevel: 1 });
+  await goto(page);
+  await page.getByText('Easy').first().click();
+  await expect(page.getByText('Enchanted Meadow')).toBeVisible({ timeout: 5000 });
+
+  // Collect left positions of all visible level node buttons (by number text)
+  const levelButtons = page.getByRole('button').filter({ hasText: /^[0-9]+$/ });
+  const count = await levelButtons.count();
+  expect(count).toBeGreaterThan(3);
+
+  // Get bounding boxes for first few nodes
+  const positions: number[] = [];
+  for (let i = 0; i < Math.min(count, 6); i++) {
+    const box = await levelButtons.nth(i).boundingBox();
+    if (box) positions.push(Math.round(box.x + box.width / 2));
+  }
+
+  // At least two distinct x positions (proof of zigzag, not straight column)
+  const unique = new Set(positions);
+  expect(unique.size).toBeGreaterThan(1);
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// 25. Game screen on small viewport shows keyboard without overflow
+// ───────────────────────────────────────────────────────────────────────────
+test('game screen keyboard and grid visible on small phone viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE
+  await setupProgress(page);
+  await goto(page);
+  await page.getByText('Easy').first().click();
+  await expect(page.getByText('Enchanted Meadow')).toBeVisible({ timeout: 5000 });
+  // Click continue (level 1)
+  await page.getByRole('button', { name: /Continue/i }).click();
+  // Wait for game to load & show keyboard
+  await expect(page.getByRole('button', { name: 'Q' })).toBeVisible({ timeout: 10000 });
+  // Check that the game container isn't overflowing
+  const overflow = await page.evaluate(() => {
+    return document.documentElement.scrollHeight <= document.documentElement.clientHeight + 5;
+  });
+  expect(overflow).toBe(true);
+});

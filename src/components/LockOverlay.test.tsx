@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { LockOverlay } from './LockOverlay';
+import LockOverlay from './LockOverlay';
 
 describe('LockOverlay', () => {
   it('renders the overlay with the correct message', () => {

@@ -8,6 +8,7 @@ interface GameTileProps {
   delay?: number; // ms stagger delay for revealed tiles
   isActive?: boolean; // current input row
   highContrast?: boolean;
+  compact?: boolean; // smaller tiles for small screens
 }
 
 /** Returns colour classes for a given tile state, optionally high-contrast. */
@@ -34,7 +35,7 @@ function tileColorClasses(state: TileState, highContrast: boolean): string {
 
 const FLIP_DURATION_MS = 500; // must match tailwind tile-flip duration
 
-const GameTile: React.FC<GameTileProps> = ({ letter, state, delay = 0, isActive = false, highContrast = false }) => {
+const GameTile: React.FC<GameTileProps> = ({ letter, state, delay = 0, isActive = false, highContrast = false, compact = false }) => {
   const outerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
 
@@ -84,7 +85,7 @@ const GameTile: React.FC<GameTileProps> = ({ letter, state, delay = 0, isActive 
     /* Perspective wrapper — never animates itself */
     <div
       ref={outerRef}
-      className="w-14 h-14 sm:w-16 sm:h-16 select-none cursor-default"
+      className={compact ? "w-10 h-10 select-none cursor-default" : "w-14 h-14 sm:w-16 sm:h-16 select-none cursor-default"}
       style={{ perspective: '400px' }}
     >
       {/* Inner card — receives flip & bounce animations */}
@@ -94,7 +95,7 @@ const GameTile: React.FC<GameTileProps> = ({ letter, state, delay = 0, isActive 
           w-full h-full
           flex items-center justify-center
           border-2 rounded
-          text-2xl sm:text-3xl font-bold tracking-widest
+          ${compact ? 'text-base font-bold' : 'text-2xl sm:text-3xl font-bold'} tracking-widest
           ${colorClasses}
           ${isActive && !letter ? 'border-onSurface/40' : ''}
         `}

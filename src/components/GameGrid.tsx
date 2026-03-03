@@ -7,9 +7,10 @@ import type { GameState } from '../logic/types';
 interface GameGridProps {
   gameState: GameState;
   highContrast?: boolean;
+  compact?: boolean;
 }
 
-const GameGrid: React.FC<GameGridProps> = ({ gameState, highContrast = false }) => {
+const GameGrid: React.FC<GameGridProps> = ({ gameState, highContrast = false, compact = false }) => {
   const {
     targetWord,
     completedGuesses,
@@ -44,7 +45,7 @@ const GameGrid: React.FC<GameGridProps> = ({ gameState, highContrast = false }) 
   for (let r = 0; r < completedGuesses.length; r++) {
     const guess = completedGuesses[r];
     rows.push(
-      <div key={`completed-${r}`} className="flex gap-1.5">
+      <div key={`completed-${r}`} className={compact ? 'flex gap-0.5' : 'flex gap-1.5'}>
         {guess.letters.map((letter, i) => (
           <GameTile
             key={i}
@@ -52,6 +53,7 @@ const GameGrid: React.FC<GameGridProps> = ({ gameState, highContrast = false }) 
             state={guess.states[i]}
             delay={i * 100}
             highContrast={highContrast}
+            compact={compact}
           />
         ))}
       </div>
@@ -62,7 +64,7 @@ const GameGrid: React.FC<GameGridProps> = ({ gameState, highContrast = false }) 
   const isActiveRowVisible = status === 'IN_PROGRESS' || status === 'OUT_OF_GUESSES';
   if (completedGuesses.length < maxGuesses && isActiveRowVisible) {
     rows.push(
-      <div key="active" ref={activeRowRef} className="flex gap-1.5">
+      <div key="active" ref={activeRowRef} className={compact ? 'flex gap-0.5' : 'flex gap-1.5'}>
         {activeRowLetters.map(({ letter, state }, i) => (
           <GameTile
             key={i}
@@ -70,6 +72,7 @@ const GameGrid: React.FC<GameGridProps> = ({ gameState, highContrast = false }) 
             state={state}
             isActive
             highContrast={highContrast}
+            compact={compact}
           />
         ))}
       </div>
@@ -80,16 +83,16 @@ const GameGrid: React.FC<GameGridProps> = ({ gameState, highContrast = false }) 
   const emptyRows = maxGuesses - completedGuesses.length - (isActiveRowVisible ? 1 : 0);
   for (let r = 0; r < Math.max(0, emptyRows); r++) {
     rows.push(
-      <div key={`empty-${r}`} className="flex gap-1.5">
+      <div key={`empty-${r}`} className={compact ? 'flex gap-0.5' : 'flex gap-1.5'}>
         {Array.from({ length: wordLen }).map((_, i) => (
-          <GameTile key={i} letter="" state="EMPTY" highContrast={highContrast} />
+          <GameTile key={i} letter="" state="EMPTY" highContrast={highContrast} compact={compact} />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-1.5 items-center">
+    <div className={compact ? 'flex flex-col gap-0.5 items-center' : 'flex flex-col gap-1.5 items-center'}>
       {rows}
     </div>
   );

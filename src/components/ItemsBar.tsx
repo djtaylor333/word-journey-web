@@ -13,6 +13,7 @@ interface ItemsBarProps {
   definitionUsed: boolean;
   hasDefinition: boolean;
   disabled?: boolean;
+  compact?: boolean;
 }
 
 interface ItemBtnProps {
@@ -21,14 +22,16 @@ interface ItemBtnProps {
   count: number;
   onClick: () => void;
   disabled: boolean;
+  compact?: boolean;
 }
 
-const ItemBtn: React.FC<ItemBtnProps> = ({ emoji, label, count, onClick, disabled }) => (
+const ItemBtn: React.FC<ItemBtnProps> = ({ emoji, label, count, onClick, disabled, compact = false }) => (
   <button
     onClick={onClick}
     disabled={disabled}
     className={`
-      flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg min-w-[60px]
+      flex flex-col items-center gap-0 rounded-lg
+      ${compact ? 'px-1.5 py-1 min-w-[48px]' : 'px-2 py-1.5 min-w-[60px]'}
       transition-all active:scale-95
       ${disabled
         ? 'bg-surface/40 text-onSurface/30 cursor-not-allowed'
@@ -36,9 +39,9 @@ const ItemBtn: React.FC<ItemBtnProps> = ({ emoji, label, count, onClick, disable
       }
     `}
   >
-    <span className="text-xl">{emoji}</span>
-    <span className="text-[10px] leading-tight text-center text-onSurface">{label}</span>
-    <span className={`text-xs font-bold ${count > 0 ? 'text-coinGold' : 'text-onSurface/40'}`}>
+    <span className={compact ? 'text-base' : 'text-xl'}>{emoji}</span>
+    <span className={`leading-tight text-center text-onSurface ${compact ? 'text-[8px]' : 'text-[10px]'}`}>{label}</span>
+    <span className={`font-bold ${compact ? 'text-[9px]' : 'text-xs'} ${count > 0 ? 'text-coinGold' : 'text-onSurface/40'}`}>
       {count > 0 ? `×${count}` : '0'}
     </span>
   </button>
@@ -47,15 +50,15 @@ const ItemBtn: React.FC<ItemBtnProps> = ({ emoji, label, count, onClick, disable
 const ItemsBar: React.FC<ItemsBarProps> = ({
   addGuessItems, removeLetterItems, definitionItems, showLetterItems,
   onAddGuess, onRemoveLetter, onDefinition, onShowLetter,
-  definitionUsed, hasDefinition, disabled = false,
+  definitionUsed, hasDefinition, disabled = false, compact = false,
 }) => (
-  <div className="flex gap-2 justify-center flex-wrap">
-    <ItemBtn emoji="➕" label="Add Guess"    count={addGuessItems}     onClick={onAddGuess}     disabled={disabled || addGuessItems <= 0} />
-    <ItemBtn emoji="🚫" label="Remove Letter" count={removeLetterItems} onClick={onRemoveLetter} disabled={disabled || removeLetterItems <= 0} />
+  <div className={`flex justify-center flex-wrap ${compact ? 'gap-1' : 'gap-2'}`}>
+    <ItemBtn emoji="➕" label="Add Guess"    count={addGuessItems}     onClick={onAddGuess}     disabled={disabled || addGuessItems <= 0}     compact={compact} />
+    <ItemBtn emoji="🚫" label="Remove Letter" count={removeLetterItems} onClick={onRemoveLetter} disabled={disabled || removeLetterItems <= 0} compact={compact} />
     {hasDefinition && (
-      <ItemBtn emoji="📖" label="Definition"   count={definitionItems}  onClick={onDefinition}  disabled={disabled || definitionItems <= 0 || definitionUsed} />
+      <ItemBtn emoji="📖" label="Definition"   count={definitionItems}  onClick={onDefinition}  disabled={disabled || definitionItems <= 0 || definitionUsed} compact={compact} />
     )}
-    <ItemBtn emoji="💡" label="Show Letter"  count={showLetterItems}  onClick={onShowLetter}  disabled={disabled || showLetterItems <= 0} />
+    <ItemBtn emoji="💡" label="Show Letter"  count={showLetterItems}  onClick={onShowLetter}  disabled={disabled || showLetterItems <= 0} compact={compact} />
   </div>
 );
 

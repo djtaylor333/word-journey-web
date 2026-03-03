@@ -1,13 +1,15 @@
 {
     "name":  "word-journey-web",
     "private":  true,
-    "version":  "1.4.0",
+    "version":  "1.5.0",
     "type":  "module",
     "scripts":  {
                     "dev":  "next dev",
                     "build":  "next build",
                     "start":  "next start",
                     "lint":  "eslint .",
+                    "test":  "jest --passWithNoTests",
+                    "test:e2e":  "playwright test",
                     "deploy":  "gh-pages -d out"
                 },
     "dependencies":  {

@@ -7,6 +7,7 @@ interface GameKeyboardProps {
   removedLetters: Set<string>;
   onKeyPress: (key: string) => void;
   disabled?: boolean;
+  compact?: boolean;
 }
 
 const ROWS = [
@@ -31,6 +32,7 @@ const GameKeyboard: React.FC<GameKeyboardProps> = ({
   removedLetters,
   onKeyPress,
   disabled = false,
+  compact = false,
 }) => {
   // Physical keyboard support
   useEffect(() => {
@@ -46,9 +48,9 @@ const GameKeyboard: React.FC<GameKeyboardProps> = ({
   }, [onKeyPress, disabled]);
 
   return (
-    <div className="flex flex-col items-center gap-1.5 w-full max-w-lg select-none">
+    <div className={`flex flex-col items-center w-full max-w-lg select-none ${compact ? 'gap-1' : 'gap-1.5'}`}>
       {ROWS.map((row, ri) => (
-        <div key={ri} className="flex gap-1 justify-center w-full">
+        <div key={ri} className={`flex justify-center w-full ${compact ? 'gap-0.5' : 'gap-1'}`}>
           {row.map(key => {
             const isAction = key === 'ENTER' || key === 'DEL';
             const removed = removedLetters.has(key);
@@ -61,8 +63,11 @@ const GameKeyboard: React.FC<GameKeyboardProps> = ({
                 disabled={disabled || removed}
                 onClick={() => !disabled && !removed && onKeyPress(key === 'DEL' ? 'BACKSPACE' : key)}
                 className={`
-                  ${isAction ? 'px-3 sm:px-4 text-sm sm:text-base font-bold' : 'w-9 sm:w-11 text-lg sm:text-xl font-bold'}
-                  h-14 sm:h-16
+                  ${isAction
+                    ? compact ? 'px-2 text-xs font-bold' : 'px-3 sm:px-4 text-sm sm:text-base font-bold'
+                    : compact ? 'w-7 text-sm font-bold' : 'w-9 sm:w-11 text-lg sm:text-xl font-bold'
+                  }
+                  ${compact ? 'h-9' : 'h-14 sm:h-16'}
                   rounded
                   flex items-center justify-center
                   transition-colors duration-200
