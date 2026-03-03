@@ -375,6 +375,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
           onDefinition={handleDefinition}
           onShowLetter={handleShowLetter}
           definitionUsed={definitionUsed}
+          hasDefinition={!!(gameState.definition)}
           disabled={gameState.status !== 'IN_PROGRESS' && gameState.status !== 'OUT_OF_GUESSES'}
         />
       </div>

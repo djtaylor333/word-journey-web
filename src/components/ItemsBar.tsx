@@ -11,6 +11,7 @@ interface ItemsBarProps {
   onDefinition: () => void;
   onShowLetter: () => void;
   definitionUsed: boolean;
+  hasDefinition: boolean;
   disabled?: boolean;
 }
 
@@ -46,12 +47,14 @@ const ItemBtn: React.FC<ItemBtnProps> = ({ emoji, label, count, onClick, disable
 const ItemsBar: React.FC<ItemsBarProps> = ({
   addGuessItems, removeLetterItems, definitionItems, showLetterItems,
   onAddGuess, onRemoveLetter, onDefinition, onShowLetter,
-  definitionUsed, disabled = false,
+  definitionUsed, hasDefinition, disabled = false,
 }) => (
   <div className="flex gap-2 justify-center flex-wrap">
     <ItemBtn emoji="➕" label="Add Guess"    count={addGuessItems}     onClick={onAddGuess}     disabled={disabled || addGuessItems <= 0} />
     <ItemBtn emoji="🚫" label="Remove Letter" count={removeLetterItems} onClick={onRemoveLetter} disabled={disabled || removeLetterItems <= 0} />
-    <ItemBtn emoji="📖" label="Definition"   count={definitionItems}  onClick={onDefinition}  disabled={disabled || definitionItems <= 0 || definitionUsed} />
+    {hasDefinition && (
+      <ItemBtn emoji="📖" label="Definition"   count={definitionItems}  onClick={onDefinition}  disabled={disabled || definitionItems <= 0 || definitionUsed} />
+    )}
     <ItemBtn emoji="💡" label="Show Letter"  count={showLetterItems}  onClick={onShowLetter}  disabled={disabled || showLetterItems <= 0} />
   </div>
 );
