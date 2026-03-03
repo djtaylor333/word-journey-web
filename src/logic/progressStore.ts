@@ -154,10 +154,15 @@ export function applyLoginStreak(progress: PlayerProgress): PlayerProgress {
 /** Check daily challenge reset — reset completed booleans if date changed */
 export function applyDailyReset(progress: PlayerProgress): PlayerProgress {
   const today = localDateStr();
+  // dailyLastDate is only set when a challenge is *won*, so comparing to today
+  // tells us whether the user already completed something today.
+  // Do NOT set dailyLastDate here — that would destroy the yesterday-streak check.
   if (progress.dailyLastDate === today) return progress;
+  // New day: clear today's completion flags and stars.
+  // Keep dailyLastDate as the last *completion* date so handleWin can compute
+  // whether yesterday was played when awarding the streak.
   return {
     ...progress,
-    dailyLastDate: today,
     dailyCompleted4: false,
     dailyCompleted5: false,
     dailyCompleted6: false,

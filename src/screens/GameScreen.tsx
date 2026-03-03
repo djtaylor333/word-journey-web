@@ -229,20 +229,38 @@ const GameScreen: React.FC<GameScreenProps> = ({
     const { coinsEarned, starsEarned } = gameState;
 
     if (isDailyChallenge) {
-      // Map difficulty to daily word length
       const lenMap: Record<string, 4|5|6> = { easy: 4, regular: 5, hard: 6, vip: 6 };
       const wordLen = lenMap[difficulty] ?? 5;
-      const field      = wordLen === 4 ? 'dailyCompleted4' : wordLen === 5 ? 'dailyCompleted5' : 'dailyCompleted6';
+      const field       = wordLen === 4 ? 'dailyCompleted4' : wordLen === 5 ? 'dailyCompleted5' : 'dailyCompleted6';
       const streakField = wordLen === 4 ? 'dailyStreak4'    : wordLen === 5 ? 'dailyStreak5'    : 'dailyStreak6';
       const bestField   = wordLen === 4 ? 'dailyBestStreak4': wordLen === 5 ? 'dailyBestStreak5': 'dailyBestStreak6';
       const starsField  = wordLen === 4 ? 'dailyStars4'     : wordLen === 5 ? 'dailyStars5'     : 'dailyStars6';
-      const today = localDateStr();
-      // Guard: only mark complete / increment streak once per day
+
+      const today     = localDateStr();
+      const yesterday = localDateStr(new Date(Date.now() - 86_400_000));
+      const lastDate  = progress.dailyLastDate;
       const alreadyDone = progress[field as keyof PlayerProgress] as boolean;
-      const prevStreak  = (progress[streakField as keyof PlayerProgress] as number) ?? 0;
-      const newStreak   = alreadyDone ? prevStreak : prevStreak + 1;
-      const prevBest    = (progress[bestField as keyof PlayerProgress] as number) ?? 0;
-      const prevStars   = (progress[starsField as keyof PlayerProgress] as number) ?? 0;
+
+      // Per-length streak: consecutive-day check
+      const prevPerStreak = (progress[streakField as keyof PlayerProgress] as number) ?? 0;
+      const newPerStreak = alreadyDone
+        ? prevPerStreak                          // guard: already done today
+        : (lastDate === yesterday || lastDate === today)
+          ? prevPerStreak + 1                    // consecutive day (or same day 2nd length)
+          : 1;                                   // streak broken — reset to 1
+
+      // Global daily streak: count once per calendar day
+      const newGlobalStreak = alreadyDone
+        ? progress.dailyStreak
+        : lastDate === yesterday
+          ? progress.dailyStreak + 1             // consecutive day ++ 
+          : lastDate === today
+            ? progress.dailyStreak               // already counted today's first win
+            : 1;                                 // streak broken
+
+      const prevBest       = (progress[bestField  as keyof PlayerProgress] as number) ?? 0;
+      const prevStars      = (progress[starsField as keyof PlayerProgress] as number) ?? 0;
+
       const updated: PlayerProgress = {
         ...progress,
         coins: progress.coins + coinsEarned,
@@ -252,9 +270,11 @@ const GameScreen: React.FC<GameScreenProps> = ({
         savedGameState: null,
         [field]: true,
         dailyLastDate: today,
-        [streakField]: newStreak,
-        [bestField]: Math.max(prevBest, newStreak),
+        [streakField]: newPerStreak,
+        [bestField]: Math.max(prevBest, newPerStreak),
         [starsField]: Math.max(prevStars, starsEarned),
+        dailyStreak: newGlobalStreak,
+        dailyBestStreak: Math.max(progress.dailyBestStreak, newGlobalStreak),
       };
       onProgressUpdate(updated);
       return;
@@ -342,7 +362,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-bg flex flex-col overflow-hidden">
+    <div className="h-dvh bg-bg flex flex-col overflow-hidden">
       {/* VIP shimmer overlay */}
       {isVip && <div className="vip-shimmer fixed inset-0 z-0 pointer-events-none" />}
 
@@ -384,7 +404,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
       </div>
 
       {/* Game area */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center gap-2 px-4 py-1">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-start gap-2 px-4 pt-1 min-h-0">
         <GameGrid gameState={gameState} highContrast={progress.highContrast} />
         <ItemsBar
           addGuessItems={progress.addGuessItems}

@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import type { PlayerProgress, Screen } from '../logic/types';
+import { localDateStr } from '../logic/progressStore';
 
 interface DailyChallengeScreenProps {
   progress: PlayerProgress;
@@ -17,7 +18,7 @@ const DAILY_LENGTHS: { len: 4 | 5 | 6; emoji: string; label: string; accentClass
 const DailyChallengeScreen: React.FC<DailyChallengeScreenProps> = ({
   progress, onNavigate, onBack,
 }) => {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateStr();
   const isToday = progress.dailyLastDate === today;
 
   const isCompleted = (len: 4 | 5 | 6) => {

@@ -50,8 +50,36 @@ export default function App() {
 
   /* ─── Sync SoundManager config whenever audio settings change ────────── */
   useEffect(() => {
-    SoundManager.configure({ sfxEnabled: progress.sfxEnabled, sfxVolume: progress.sfxVolume });
-  }, [progress.sfxEnabled, progress.sfxVolume]);
+    SoundManager.configure({
+      sfxEnabled: progress.sfxEnabled,
+      sfxVolume: progress.sfxVolume,
+      musicEnabled: progress.musicEnabled,
+      musicVolume: progress.musicVolume,
+    });
+  }, [progress.sfxEnabled, progress.sfxVolume, progress.musicEnabled, progress.musicVolume]);
+
+  /* ─── Dark / light mode ──────────────────────────────────────────────── */
+  useEffect(() => {
+    document.documentElement.classList.toggle('light', !progress.darkMode);
+  }, [progress.darkMode]);
+
+  /* ─── Text scale ─────────────────────────────────────────────────────── */
+  useEffect(() => {
+    document.documentElement.style.fontSize = `${progress.textScale * 100}%`;
+  }, [progress.textScale]);
+
+  /* ─── Intercept browser / hardware back button ───────────────────────── */
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.history.pushState(null, '');
+    const handler = () => {
+      window.history.pushState(null, '');
+      setScreenStack(stack => stack.length > 1 ? stack.slice(0, -1) : stack);
+    };
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ─── Persist on every progress change ───────────────────────────────── */
   useEffect(() => {

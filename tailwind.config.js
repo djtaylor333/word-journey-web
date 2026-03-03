@@ -8,12 +8,12 @@ export default {
     extend: {
       colors: {
         // Backgrounds
-        bg: '#1C1610',
-        surface: '#2A2117',
-        surfaceVariant: '#352B1E',
+        bg:             'var(--color-bg)',
+        surface:        'var(--color-surface)',
+        surfaceVariant: 'var(--color-surfaceVariant)',
         // Text
-        onBg: '#F0E8D4',
-        onSurface: '#E8DCC8',
+        onBg:      'var(--color-onBg)',
+        onSurface: 'var(--color-onSurface)',
         // Primary / Gold
         primary: '#C9A84C',
         primaryDark: '#B8760A',

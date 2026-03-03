@@ -24,15 +24,76 @@ type SoundName =
 
 interface Config {
   sfxEnabled: boolean;
-  sfxVolume: number; // 0–100
+  sfxVolume: number;    // 0–100
+  musicEnabled: boolean;
+  musicVolume: number;  // 0–100
 }
 
 class _SoundManager {
   private ctx: AudioContext | null = null;
-  private config: Config = { sfxEnabled: true, sfxVolume: 100 };
+  private config: Config = { sfxEnabled: true, sfxVolume: 100, musicEnabled: false, musicVolume: 70 };
+
+  // ── Music ─────────────────────────────────────────────────
+  // C pentatonic minor arpeggio: C4, Eb4, F4, G4, Bb4, C5, Bb4, G4
+  private readonly MUSIC_NOTES = [261.63, 311.13, 349.23, 392.00, 466.16, 523.25, 466.16, 392.00];
+  private readonly BEAT_MS = 550;
+  private musicBeat = 0;
+  private musicTimer: ReturnType<typeof setTimeout> | null = null;
+  private musicGain: GainNode | null = null;
+  private musicPlaying = false;
+
+  private startMusic(): void {
+    if (this.musicPlaying) return;
+    const ctx = this.getCtx();
+    if (!ctx) return;
+    this.musicPlaying = true;
+    this.musicBeat = 0;
+    this.musicGain = ctx.createGain();
+    this.musicGain.gain.value = (this.config.musicVolume / 100) * 0.12;
+    this.musicGain.connect(ctx.destination);
+    this.tickMusic();
+  }
+
+  private tickMusic(): void {
+    if (!this.musicPlaying) return;
+    const ctx = this.getCtx();
+    if (!ctx || !this.musicGain) return;
+    const freq = this.MUSIC_NOTES[this.musicBeat % this.MUSIC_NOTES.length];
+    this.musicBeat++;
+    const osc = ctx.createOscillator();
+    const env = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    osc.connect(env);
+    env.connect(this.musicGain);
+    const now = ctx.currentTime;
+    const beat = this.BEAT_MS / 1000;
+    env.gain.setValueAtTime(0, now);
+    env.gain.linearRampToValueAtTime(1, now + beat * 0.1);
+    env.gain.setValueAtTime(1, now + beat * 0.6);
+    env.gain.linearRampToValueAtTime(0, now + beat * 0.95);
+    osc.start(now);
+    osc.stop(now + beat);
+    this.musicTimer = setTimeout(() => this.tickMusic(), this.BEAT_MS);
+  }
+
+  private stopMusic(): void {
+    this.musicPlaying = false;
+    if (this.musicTimer !== null) { clearTimeout(this.musicTimer); this.musicTimer = null; }
+    if (this.musicGain) { try { this.musicGain.disconnect(); } catch { /* ignore */ } this.musicGain = null; }
+    this.musicBeat = 0;
+  }
 
   configure(cfg: Partial<Config>): void {
+    const prevMusic = this.config.musicEnabled;
     this.config = { ...this.config, ...cfg };
+    if (this.config.musicEnabled && !prevMusic) {
+      this.startMusic();
+    } else if (!this.config.musicEnabled && prevMusic) {
+      this.stopMusic();
+    } else if (this.musicGain && 'musicVolume' in cfg) {
+      this.musicGain.gain.value = (this.config.musicVolume / 100) * 0.12;
+    }
   }
 
   /** Call once on first user interaction to unlock AudioContext */

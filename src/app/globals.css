@@ -2,8 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Dark theme — default */
 :root {
+  --color-bg:             #1C1610;
+  --color-surface:        #2A2117;
+  --color-surfaceVariant: #352B1E;
+  --color-onBg:           #F0E8D4;
+  --color-onSurface:      #E8DCC8;
   color-scheme: dark;
+}
+
+/* Light theme — toggled by removing the 'dark' class */
+:root.light {
+  --color-bg:             #FAF6EE;
+  --color-surface:        #FFFFFF;
+  --color-surfaceVariant: #F0EDE5;
+  --color-onBg:           #1C1610;
+  --color-onSurface:      #352B1E;
+  color-scheme: light;
 }
 
 * {
@@ -13,8 +29,8 @@
 }
 
 body {
-  background-color: #1C1610;
-  color: #F0E8D4;
+  background-color: var(--color-bg);
+  color: var(--color-onBg);
   font-family: system-ui, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
