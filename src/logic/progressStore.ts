@@ -102,9 +102,14 @@ export function loadProgress(): PlayerProgress | null {
     // (e.g. the win-loop bug that fired handleWin thousands of times)
     return {
       ...merged,
-      lives:    Math.min(Math.max(0, merged.lives),    999),
-      coins:    Math.min(Math.max(0, merged.coins),    9_999_999),
-      diamonds: Math.min(Math.max(0, merged.diamonds), 9_999),
+      lives:         Math.min(Math.max(0, merged.lives),         999),
+      coins:         Math.min(Math.max(0, merged.coins),         9_999_999),
+      diamonds:      Math.min(Math.max(0, merged.diamonds),      9_999),
+      // Level numbers inflated by the old win-loop bug — cap at sane maximums
+      easyLevel:     Math.min(Math.max(1, merged.easyLevel),     9_999),
+      regularLevel:  Math.min(Math.max(1, merged.regularLevel),  9_999),
+      hardLevel:     Math.min(Math.max(1, merged.hardLevel),     9_999),
+      vipLevel:      Math.min(Math.max(1, merged.vipLevel),      9_999),
     };
   } catch {
     return null;

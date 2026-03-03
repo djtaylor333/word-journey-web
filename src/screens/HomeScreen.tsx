@@ -132,7 +132,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
           <button
             onClick={() => onNavigate({ name: 'dailyChallenge' })}
             className={`w-full flex items-center gap-4 p-4 rounded-2xl bg-surface border transition-all active:scale-[0.98] ${
-              needsDaily ? 'border-accentRegular/60 animate-pulse-border' : 'border-borderFilled/50'
+              needsDaily ? 'border-accentRegular/50' : 'border-borderFilled/50'
             }`}
           >
             <span className="text-3xl">📅</span>

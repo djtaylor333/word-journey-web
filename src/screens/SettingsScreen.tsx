@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import type { PlayerProgress } from '../logic/types';
 import LockOverlay from '../components/LockOverlay';
-import { resetProgress } from '../logic/progressStore';
+import { resetProgress, saveProgress, DEFAULT_PROGRESS } from '../logic/progressStore';
 
 const APP_VERSION = '1.0.0';
 const UNLOCK_TAPS = 7; // tap version label this many times to unlock dev mode
@@ -23,6 +23,8 @@ const ToggleRow = ({
     </div>
     <button
       onClick={() => onChange(!value)}
+      role="switch"
+      aria-checked={value}
       className={`relative w-12 h-6 rounded-full transition-colors ${value ? 'bg-tileCorrect' : 'bg-surface'}`}
     >
       <span
@@ -250,8 +252,10 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ progress, onProgress, o
               <button
                 onClick={() => {
                   if (confirm('Reset ALL progress? This cannot be undone.')) {
-                    resetProgress();
-                    window.location.reload();
+                    resetProgress();                        // remove old key
+                    saveProgress({ ...DEFAULT_PROGRESS });  // write clean defaults synchronously
+                    onProgress({ ...DEFAULT_PROGRESS });    // update React state immediately
+                    onBack();                               // navigate back to home
                   }
                 }}
                 className="w-full bg-accentHard/20 border border-accentHard/40 text-accentHard text-sm font-bold py-2.5 rounded-xl active:scale-95 transition-transform"
