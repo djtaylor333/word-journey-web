@@ -4,6 +4,7 @@ import type { Screen, Difficulty } from '../logic/types';
 import type { PlayerProgress } from '../logic/types';
 import { DEFAULT_PROGRESS, loadProgress, saveProgress, applyLoginStreak, applyDailyReset, applyNewPlayerBonus, getOrCreatePlayerId } from '../logic/progressStore';
 import { applyLivesRegen, startRegenTimer } from '../logic/livesRegen';
+import { SoundManager } from '../logic/soundManager';
 
 import HomeScreen        from '../screens/HomeScreen';
 import LevelSelectScreen from '../screens/LevelSelectScreen';
@@ -46,6 +47,11 @@ export default function App() {
     }
     setReady(true);
   }, []);
+
+  /* ─── Sync SoundManager config whenever audio settings change ────────── */
+  useEffect(() => {
+    SoundManager.configure({ sfxEnabled: progress.sfxEnabled, sfxVolume: progress.sfxVolume });
+  }, [progress.sfxEnabled, progress.sfxVolume]);
 
   /* ─── Persist on every progress change ───────────────────────────────── */
   useEffect(() => {

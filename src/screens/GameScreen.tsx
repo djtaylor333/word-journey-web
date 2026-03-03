@@ -9,6 +9,7 @@ import {
 } from '../logic/gameEngine';
 import { getWordForLevel, loadValidWords, getDailyWord } from '../logic/wordLoader';
 import { startRegenTimer, applyLivesRegen } from '../logic/livesRegen';
+import { SoundManager } from '../logic/soundManager';
 import GameGrid from '../components/GameGrid';
 import GameKeyboard from '../components/GameKeyboard';
 import ItemsBar from '../components/ItemsBar';
@@ -41,6 +42,12 @@ const GameScreen: React.FC<GameScreenProps> = ({
   const lifeSpent = useRef(false);
   const gameLoadedRef = useRef(false);  // true once a GameState has been set
   const winHandledRef = useRef(false);  // prevent handleWin firing more than once
+  const loseHandledRef = useRef(false); // prevent lose sound firing more than once
+
+  // Sync SoundManager config whenever audio settings change
+  useEffect(() => {
+    SoundManager.configure({ sfxEnabled: progress.sfxEnabled, sfxVolume: progress.sfxVolume });
+  }, [progress.sfxEnabled, progress.sfxVolume]);
 
   // ── Serialise/deserialise GameState (Set + Map aren't JSON-safe) ──────────
   const saveKey = `${difficulty}-${level}`;
@@ -148,7 +155,12 @@ const GameScreen: React.FC<GameScreenProps> = ({
   useEffect(() => {
     if (gameState?.status === 'WON' && !winHandledRef.current) {
       winHandledRef.current = true;
+      SoundManager.play(isDailyChallenge ? 'dailyComplete' : 'win');
       handleWin();
+    }
+    if (gameState?.status === 'LOST' && !loseHandledRef.current) {
+      loseHandledRef.current = true;
+      SoundManager.play('lose');
     }
   // handleWin reads progress via closure; status is the only trigger needed
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -158,18 +170,35 @@ const GameScreen: React.FC<GameScreenProps> = ({
     if (!gameState) return;
     if (showRemovePicker) {
       if (/^[A-Z]$/.test(key)) {
+        SoundManager.play('powerUp');
         setGameState(prev => prev ? applyRemoveLetter(prev, key) : prev);
         onProgressUpdate({ ...progress, removeLetterItems: progress.removeLetterItems - 1, totalItemsUsed: progress.totalItemsUsed + 1 });
         setShowRemovePicker(false);
       }
       return;
     }
+    // Play key-press click for letter and backspace keys
+    if (/^[A-Z]$/.test(key) || key === 'BACKSPACE') {
+      SoundManager.play('keyPress');
+    }
     const next = handleKeyPress(gameState, key, validWords);
+    // Row just submitted — play staggered tile reveal sounds
+    if (next.completedGuesses.length > gameState.completedGuesses.length) {
+      const row = next.completedGuesses[next.completedGuesses.length - 1];
+      row.states.forEach((state, i) => {
+        setTimeout(() => {
+          if (state === 'CORRECT')      SoundManager.play('tileCorrect');
+          else if (state === 'PRESENT') SoundManager.play('tilePresent');
+          else                          SoundManager.play('tileAbsent');
+        }, i * 220);
+      });
+    }
     setGameState(next);
   }, [gameState, validWords, showRemovePicker, progress, onProgressUpdate]);
 
   const handleAddGuess = () => {
     if (!gameState || progress.addGuessItems <= 0) return;
+    SoundManager.play('powerUp');
     const next = applyAddGuess(gameState);
     setGameState(next);
     onProgressUpdate({ ...progress, addGuessItems: progress.addGuessItems - 1, totalItemsUsed: progress.totalItemsUsed + 1 });
@@ -177,6 +206,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
 
   const handleShowLetter = () => {
     if (!gameState || progress.showLetterItems <= 0) return;
+    SoundManager.play('powerUp');
     const next = applyShowLetter(gameState);
     setGameState(next);
     onProgressUpdate({ ...progress, showLetterItems: progress.showLetterItems - 1, totalItemsUsed: progress.totalItemsUsed + 1 });
@@ -184,6 +214,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
 
   const handleDefinition = () => {
     if (!gameState || progress.definitionItems <= 0 || definitionUsed) return;
+    SoundManager.play('powerUp');
     setDefinitionUsed(true);
     setShowDefinition(true);
     onProgressUpdate({ ...progress, definitionItems: progress.definitionItems - 1, totalItemsUsed: progress.totalItemsUsed + 1 });
