@@ -84,6 +84,17 @@ export const DEFAULT_PROGRESS: PlayerProgress = {
   devModeEnabled: false,
 };
 
+/**
+ * Returns today's date as a local YYYY-MM-DD string (matching Android's device-local timezone).
+ * Using toISOString() would give UTC which diverges from Android near date boundaries.
+ */
+export function localDateStr(date: Date = new Date()): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 export function saveProgress(progress: PlayerProgress): void {
   if (typeof window === 'undefined') return;
   // Convert Set/Map to serializable form — they're not in progress, but be safe
@@ -123,10 +134,10 @@ export function resetProgress(): void {
 
 /** Update login streak based on today's date */
 export function applyLoginStreak(progress: PlayerProgress): PlayerProgress {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateStr();
   if (progress.lastLoginDate === today) return progress;
 
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const yesterday = localDateStr(new Date(Date.now() - 86400000));
   const newStreak = progress.lastLoginDate === yesterday
     ? progress.loginStreak + 1
     : 1;
@@ -142,7 +153,7 @@ export function applyLoginStreak(progress: PlayerProgress): PlayerProgress {
 
 /** Check daily challenge reset — reset completed booleans if date changed */
 export function applyDailyReset(progress: PlayerProgress): PlayerProgress {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateStr();
   if (progress.dailyLastDate === today) return progress;
   return {
     ...progress,

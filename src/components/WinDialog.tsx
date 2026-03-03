@@ -12,6 +12,7 @@ interface WinDialogProps {
   guessCount: number;
   coinsEarned: number;
   isReplay: boolean;
+  isDailyChallenge?: boolean;
   onNextLevel: () => void;
   onMainMenu: () => void;
 }
@@ -20,7 +21,7 @@ const CONFETTI_COLORS = ['#F59E0B','#22C55E','#3B82F6','#EF4444','#A855F7','#06B
 
 const WinDialog: React.FC<WinDialogProps> = ({
   difficulty, level, targetWord, definition, guessCount,
-  coinsEarned, isReplay, onNextLevel, onMainMenu,
+  coinsEarned, isReplay, isDailyChallenge, onNextLevel, onMainMenu,
 }) => {
   const stars = starsFromGuesses(guessCount);
   const accent = DIFFICULTY_ACCENT[difficulty];
@@ -74,10 +75,10 @@ const WinDialog: React.FC<WinDialogProps> = ({
         {/* Trophy */}
         <div className="text-6xl text-center mb-2 animate-bounce-trophy">🏆</div>
         <h2 className="text-2xl font-bold text-center mb-1" style={{ color: accent }}>
-          Level Solved!
+          {isDailyChallenge ? 'Daily Challenge Solved!' : 'Level Solved!'}
         </h2>
         <p className="text-center text-onSurface/60 text-sm mb-3">
-          {DIFFICULTY_LABELS[difficulty]} · Level {level}
+          {DIFFICULTY_LABELS[difficulty]} · {isDailyChallenge ? '📅 Daily' : `Level ${level}`}
         </p>
 
         {/* Stars */}
@@ -121,7 +122,7 @@ const WinDialog: React.FC<WinDialogProps> = ({
             className="flex-1 py-2.5 rounded-lg font-bold text-bg transition-colors text-sm"
             style={{ backgroundColor: accent }}
           >
-            Next Level ➡
+            {isDailyChallenge ? '📅 Daily Hub' : 'Next Level ➡'}
           </button>
         </div>
       </div>

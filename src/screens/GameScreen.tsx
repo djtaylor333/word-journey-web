@@ -97,7 +97,8 @@ const GameScreen: React.FC<GameScreenProps> = ({
       }
 
       const wordLen = wordLengthForLevel(difficulty, level);
-      const today = new Date().toISOString().slice(0, 10);
+      const d = new Date();
+      const today = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
       const [entry, vw] = await Promise.all([
         isDailyChallenge
           ? getDailyWord(today, wordLen)
@@ -223,6 +224,21 @@ const GameScreen: React.FC<GameScreenProps> = ({
   const handleWin = () => {
     if (!gameState) return;
     const { coinsEarned, starsEarned } = gameState;
+
+    if (isDailyChallenge) {
+      // Daily challenge: update coins/stars/totalWins only — do NOT touch level progression
+      const updated: PlayerProgress = {
+        ...progress,
+        coins: progress.coins + coinsEarned,
+        totalWins: progress.totalWins + 1,
+        totalDailyChallengesCompleted: progress.totalDailyChallengesCompleted + 1,
+        totalGuesses: progress.totalGuesses + gameState.completedGuesses.length,
+        savedGameState: null,
+      };
+      onProgressUpdate(updated);
+      return;
+    }
+
     const levelKey = `${difficulty}-${level}`;
     const existingStars = progress.levelStars[levelKey] ?? 0;
     const newStars = Math.max(existingStars, starsEarned);
@@ -250,12 +266,16 @@ const GameScreen: React.FC<GameScreenProps> = ({
       totalWins: progress.totalWins + 1,
       totalLevelsCompleted: progress.totalLevelsCompleted + 1,
       totalGuesses: progress.totalGuesses + gameState.completedGuesses.length,
-      savedGameState: null,  // clear mid-game save on victory
+      savedGameState: null,
     };
     onProgressUpdate(updated);
   };
 
   const handleNextLevel = () => {
+    if (isDailyChallenge) {
+      onNavigate({ name: 'dailyChallenge' });
+      return;
+    }
     onNavigate({ name: 'game', difficulty, level: level + 1 });
   };
 
@@ -439,6 +459,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
           guessCount={gameState.completedGuesses.length}
           coinsEarned={gameState.coinsEarned}
           isReplay={isReplay}
+          isDailyChallenge={isDailyChallenge}
           onNextLevel={handleNextLevel}
           onMainMenu={onBack}
         />
