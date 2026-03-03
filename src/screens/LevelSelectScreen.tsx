@@ -39,7 +39,7 @@ const LevelSelectScreen: React.FC<LevelSelectScreenProps> = ({
 
   return (
     <div
-      className="min-h-screen flex flex-col relative overflow-hidden"
+      className="h-screen flex flex-col relative"
       style={{ background: `linear-gradient(135deg, ${zone.bgFrom}, ${zone.bgTo})` }}
     >
       {/* VIP golden shimmer overlay */}
@@ -63,7 +63,7 @@ const LevelSelectScreen: React.FC<LevelSelectScreenProps> = ({
       {/* Level grid */}
       <div ref={scrollContainerRef} className="relative z-10 flex-1 overflow-y-auto px-4 pb-safe pb-8">
         <div className="flex flex-col items-center gap-0">
-          {Array.from({ length: totalLevels }, (_, i) => i + 1).reverse().map(lv => {
+          {Array.from({ length: totalLevels }, (_, i) => i + 1).map(lv => {
             const isCompleted = lv < currentLevel;
             const isCurrent   = lv === currentLevel;
             const isLocked    = lv > currentLevel;
@@ -71,8 +71,8 @@ const LevelSelectScreen: React.FC<LevelSelectScreenProps> = ({
 
             return (
               <div key={lv} className="flex flex-col items-center">
-                {/* Dashed path segment */}
-                {lv < totalLevels && (
+                {/* Dashed path segment (above every node except level 1) */}
+                {lv > 1 && (
                   <div
                     className="w-0.5 h-6 opacity-40"
                     style={{ background: zone.pathColor, borderRight: `2px dashed ${zone.pathColor}` }}
