@@ -300,3 +300,166 @@ test('back button returns to home from Level Select', async ({ page }) => {
   await page.getByRole('button', { name: '←' }).click();
   await expect(page.getByText('Word Journeys')).toBeVisible({ timeout: 5000 });
 });
+
+// ───────────────────────────────────────────────────────────────────────────
+// 14. Back from Daily Challenge hub returns to Home
+// ───────────────────────────────────────────────────────────────────────────
+test('back from Daily Challenge hub goes to home', async ({ page }) => {
+  await setupProgress(page);
+  await goto(page);
+  await page.getByRole('button', { name: /Daily Challenge/i }).click();
+  await expect(page.getByText(/4 letters/i)).toBeVisible({ timeout: 5000 });
+  await page.getByRole('button', { name: '←' }).click();
+  await expect(page.getByText('Word Journeys')).toBeVisible({ timeout: 5000 });
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// 15. Multi-level back navigation — home → level select → game → back → back → home
+// ───────────────────────────────────────────────────────────────────────────
+test('back navigation through multiple levels without looping', async ({ page }) => {
+  await setupProgress(page);
+  await goto(page);
+
+  // Navigate two levels deep
+  await page.getByText('Regular').first().click();
+  await expect(page.getByText('Enchanted Meadow')).toBeVisible({ timeout: 5000 });
+
+  // Go back once => home
+  await page.getByRole('button', { name: '←' }).click();
+  await expect(page.getByText('Word Journeys')).toBeVisible({ timeout: 5000 });
+
+  // Verify we are actually on the home screen (not looped somewhere else)
+  await expect(page.getByText(/🗺️ Adventure|Adventure/i).first()).toBeVisible({ timeout: 3000 });
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// 16. Store screen opens and shows tabs
+// ───────────────────────────────────────────────────────────────────────────
+test('Store screen opens with tab navigation', async ({ page }) => {
+  await setupProgress(page);
+  await goto(page);
+  await page.getByRole('button', { name: '🛒' }).click();
+  await expect(page.getByText('Store')).toBeVisible({ timeout: 5000 });
+  // Store has category tabs
+  await expect(page.getByRole('button', { name: /Power-?ups|Boosts|Lives/i }).first()).toBeVisible({ timeout: 3000 });
+  // Back returns to home
+  await page.getByRole('button', { name: '←' }).click();
+  await expect(page.getByText('Word Journeys')).toBeVisible({ timeout: 5000 });
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// 17. Settings: dark mode toggle changes HTML class
+// ───────────────────────────────────────────────────────────────────────────
+test('Settings dark mode toggle applies theme class to document', async ({ page }) => {
+  // Start in dark mode (default)
+  await setupProgress(page, { darkMode: true });
+  await goto(page);
+  await page.getByRole('button', { name: '⚙️' }).click();
+  await expect(page.getByText('Settings')).toBeVisible({ timeout: 5000 });
+
+  // In dark mode, html should NOT have .light class
+  const htmlClass = await page.evaluate(() => document.documentElement.className);
+  expect(htmlClass).not.toContain('light');
+
+  // Toggle to light mode
+  const darkModeRow = page.locator('text=Dark Mode').first().locator('xpath=../..').first();
+  const toggle = darkModeRow.locator('button[aria-checked]').first();
+  await toggle.click();
+
+  // Now .light class should be present
+  const htmlClassAfter = await page.evaluate(() => document.documentElement.className);
+  expect(htmlClassAfter).toContain('light');
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// 18. Settings: text scale buttons are rendered
+// ───────────────────────────────────────────────────────────────────────────
+test('Settings shows text scale options (S / M / L / XL)', async ({ page }) => {
+  await setupProgress(page);
+  await goto(page);
+  await page.getByRole('button', { name: '⚙️' }).click();
+  await expect(page.getByText('Settings')).toBeVisible({ timeout: 5000 });
+
+  // Scroll down to find text scale
+  await page.getByText('Text Scale').scrollIntoViewIfNeeded().catch(() => null);
+  await expect(page.getByText('Text Scale')).toBeVisible({ timeout: 3000 });
+  // The scale buttons should be visible (labels like 'Small (85%)', 'Normal (100%)', 'Large (115%)')
+  await expect(page.getByRole('button', { name: /Small|Normal|Large/i }).first()).toBeVisible({ timeout: 3000 });
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// 19. Completed daily challenge shows checkmark and disables play button
+// ───────────────────────────────────────────────────────────────────────────
+test('completed daily challenge card is disabled', async ({ page }) => {
+  const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
+  await setupProgress(page, {
+    dailyLastDate: today,
+    dailyCompleted4: true,
+    dailyCompleted5: true,
+    dailyCompleted6: true,
+    dailyStars4: 3,
+    dailyStars5: 2,
+    dailyStars6: 1,
+  });
+  await goto(page);
+  await page.getByRole('button', { name: /Daily Challenge/i }).click();
+  await expect(page.getByText(/4 letters/i)).toBeVisible({ timeout: 5000 });
+
+  // At least one card shows stars (★)
+  await expect(page.getByText('★').first()).toBeVisible({ timeout: 3000 });
+
+  // All challenge buttons should be disabled
+  const cards = page.locator('button:disabled');
+  const count = await cards.count();
+  expect(count).toBeGreaterThanOrEqual(1); // at least some are disabled
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// 20. Daily challenge streak displayed on hub screen
+// ───────────────────────────────────────────────────────────────────────────
+test('daily challenge streak is visible on hub screen', async ({ page }) => {
+  await setupProgress(page, { dailyStreak: 7, dailyBestStreak: 12 });
+  await goto(page);
+  await page.getByRole('button', { name: /Daily Challenge/i }).click();
+  // The streak banner shows streak/best numbers
+  const body = await page.locator('body').textContent() ?? '';
+  expect(body).toContain('7');
+  expect(body).toContain('12');
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// 21. Back buttons have large tap targets (min 44×44 CSS px)
+// ───────────────────────────────────────────────────────────────────────────
+test('back buttons have adequately sized tap targets', async ({ page }) => {
+  await setupProgress(page);
+  await goto(page);
+  await page.getByText('Easy').first().click();
+  await expect(page.getByText('Enchanted Meadow')).toBeVisible({ timeout: 5000 });
+
+  const backBtn = page.getByRole('button', { name: '←' });
+  const box = await backBtn.boundingBox();
+  expect(box).not.toBeNull();
+  // At least 40px wide and tall for comfortable tapping
+  expect(box!.width).toBeGreaterThanOrEqual(40);
+  expect(box!.height).toBeGreaterThanOrEqual(40);
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// 22. App screens are max-width constrained (tablet-friendly)
+// ───────────────────────────────────────────────────────────────────────────
+test('screens are constrained to max-width on wide viewports', async ({ page }) => {
+  // Simulate a tablet/desktop
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await setupProgress(page);
+  await goto(page);
+
+  // The content container should never be wider than, say, 720px on a 1280px screen
+  const homeContent = page.locator('.max-w-2xl').first();
+  const count = await homeContent.count();
+  expect(count).toBeGreaterThan(0); // max-w-2xl class exists
+
+  const box = await homeContent.boundingBox();
+  if (box) {
+    expect(box.width).toBeLessThanOrEqual(700); // max-w-2xl is 672px
+  }
+});

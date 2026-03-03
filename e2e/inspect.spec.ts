@@ -193,12 +193,12 @@ test.describe('Settings — version and dev mode', () => {
     await expect(page.getByText('Settings')).toBeVisible({ timeout: 5000 });
   }
 
-  test('version shows 1.0.0 (not "Web Preview")', async ({ page }) => {
+  test('version shows 1.4.0', async ({ page }) => {
     await openSettings(page);
     await page.getByText('About').scrollIntoViewIfNeeded().catch(() => null);
     await page.screenshot({ path: 'test-results/inspect-09-version.png', fullPage: true });
 
-    await expect(page.getByText('1.0.0')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('1.4.0')).toBeVisible({ timeout: 5000 });
     await expect(page.getByText('Web Preview')).toHaveCount(0);
   });
 
@@ -210,7 +210,7 @@ test.describe('Settings — version and dev mode', () => {
 
   test('tapping version row 7 times unlocks dev panel', async ({ page }) => {
     await openSettings(page, { devModeEnabled: false });
-    const versionBtn = page.locator('button').filter({ hasText: /1\.0\.0/ }).first();
+    const versionBtn = page.locator('button').filter({ hasText: /1\.4\.0/ }).first();
     await versionBtn.scrollIntoViewIfNeeded();
     await page.screenshot({ path: 'test-results/inspect-11-pre-dev-tap.png', fullPage: true });
 
