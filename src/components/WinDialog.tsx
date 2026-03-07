@@ -92,7 +92,10 @@ const WinDialog: React.FC<WinDialogProps> = ({
         <div className="bg-surfaceVariant rounded-xl p-3 mb-3 text-center">
           <div className="text-2xl font-bold tracking-widest text-tileCorrect mb-1">{targetWord}</div>
           {definition && (
-            <p className="text-onSurface/70 text-sm italic">{definition}</p>
+            <div className="mt-1">
+              <div className="text-xs font-semibold text-onSurface/40 uppercase tracking-wider mb-0.5">Definition</div>
+              <p className="text-onSurface/70 text-sm">{definition}</p>
+            </div>
           )}
         </div>
 

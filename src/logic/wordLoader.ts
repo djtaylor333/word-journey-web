@@ -92,15 +92,31 @@ function computeDateSeed(dateStr: string, wordLength: number): bigint {
   return datePart + BigInt(wordLength) * 31n;
 }
 
-// Cached daily pool: valid_words filtered/sorted, level words excluded
+// Cached daily definitions: keyed by UPPERCASE word
+let dailyDefinitionsCache: Map<string, string> | null = null;
+
+async function loadDailyDefinitions(): Promise<Map<string, string>> {
+  if (dailyDefinitionsCache) return dailyDefinitionsCache;
+  try {
+    const res = await fetch(`${BASE_PATH}/data/daily_word_definitions.json`);
+    const raw = await res.json() as Record<string, string>;
+    dailyDefinitionsCache = new Map(Object.entries(raw).map(([k, v]) => [k.toUpperCase(), v]));
+  } catch {
+    dailyDefinitionsCache = new Map();
+  }
+  return dailyDefinitionsCache;
+}
+
+// Cached daily pool: valid_words filtered to only words with definitions, level words excluded
 let dailyPoolCache: Map<number, string[]> | null = null;
 
 async function loadDailyPool(): Promise<Map<number, string[]>> {
   if (dailyPoolCache) return dailyPoolCache;
 
-  const [validData, wordData] = await Promise.all([
+  const [validData, wordData, definitions] = await Promise.all([
     fetch(`${BASE_PATH}/data/valid_words.json`).then(r => r.json()),
     fetch(`${BASE_PATH}/data/words.json`).then(r => r.json()),
+    loadDailyDefinitions(),
   ]);
 
   // Collect all level words to exclude from daily pool (matches Android behaviour)
@@ -109,14 +125,16 @@ async function loadDailyPool(): Promise<Map<number, string[]>> {
     for (const entry of bucket) levelWords.add(entry.word.toUpperCase());
   }
 
-  // Build alphabetically-sorted pool per length (sort = determinism, matches Android)
+  // Build alphabetically-sorted pool per length — only words that have a definition,
+  // matching Android's DailyChallengeRepository.buildWordList() filter so both platforms
+  // serve the same word every day.
   const pool = new Map<number, string[]>();
   for (const [lenKey, rawWords] of Object.entries(validData as Record<string, string[]>)) {
     const len = parseInt(lenKey);
     if (len === 4 || len === 5 || len === 6) {
       const words = (rawWords as string[])
         .map(w => w.toUpperCase())
-        .filter(w => !levelWords.has(w))
+        .filter(w => !levelWords.has(w) && definitions.has(w))
         .sort();
       pool.set(len, words);
     }
@@ -127,15 +145,17 @@ async function loadDailyPool(): Promise<Map<number, string[]>> {
 }
 
 /**
- * Returns the daily challenge word for a given date + length.
- * Algorithm is identical to Android's DailyChallengeRepository so both
- * platforms serve the same word every day.
+ * Returns the daily challenge word for a given date + length, including its definition.
+ * Algorithm is identical to Android's DailyChallengeRepository so both platforms
+ * serve the same word every day.  The pool is pre-filtered to only words that have
+ * verified definitions, guaranteeing the win screen can always display a definition.
  */
 export async function getDailyWord(date: string, length: number): Promise<WordEntry> {
-  const pool = await loadDailyPool();
+  const [pool, definitions] = await Promise.all([loadDailyPool(), loadDailyDefinitions()]);
   const words = pool.get(length) ?? [];
   if (words.length === 0) return { word: 'HELLO', definition: '' };
   const seed  = computeDateSeed(date, length);
   const idx   = javaRandom(seed)(words.length);
-  return { word: words[idx], definition: '' };
+  const word  = words[idx];
+  return { word, definition: definitions.get(word) ?? '' };
 }
