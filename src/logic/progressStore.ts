@@ -82,6 +82,13 @@ export const DEFAULT_PROGRESS: PlayerProgress = {
   savedGameState: null,
   isVip: false,
   devModeEnabled: false,
+  // Seasonal themed packs — start at level 1
+  seasonalEasterLevel: 1,
+  seasonalValentinesLevel: 1,
+  seasonalSummerLevel: 1,
+  seasonalHalloweenLevel: 1,
+  seasonalThanksgivingLevel: 1,
+  seasonalChristmasLevel: 1,
 };
 
 /**
@@ -121,6 +128,13 @@ export function loadProgress(): PlayerProgress | null {
       regularLevel:  Math.min(Math.max(1, merged.regularLevel),  9_999),
       hardLevel:     Math.min(Math.max(1, merged.hardLevel),     9_999),
       vipLevel:      Math.min(Math.max(1, merged.vipLevel),      9_999),
+      // Seasonal levels: 1–100 wrap naturally, cap defensively
+      seasonalEasterLevel:       Math.min(Math.max(1, merged.seasonalEasterLevel),       100),
+      seasonalValentinesLevel:   Math.min(Math.max(1, merged.seasonalValentinesLevel),   100),
+      seasonalSummerLevel:       Math.min(Math.max(1, merged.seasonalSummerLevel),       100),
+      seasonalHalloweenLevel:    Math.min(Math.max(1, merged.seasonalHalloweenLevel),    100),
+      seasonalThanksgivingLevel: Math.min(Math.max(1, merged.seasonalThanksgivingLevel), 100),
+      seasonalChristmasLevel:    Math.min(Math.max(1, merged.seasonalChristmasLevel),    100),
     };
   } catch {
     return null;

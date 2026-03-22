@@ -1,13 +1,14 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import type { Difficulty, PlayerProgress, Screen } from '../logic/types';
-import { DIFFICULTY_ACCENT, DIFFICULTY_LABELS, wordLengthForLevel, BONUS_LIFE_EVERY } from '../logic/types';
+import { DIFFICULTY_ACCENT, DIFFICULTY_LABELS, wordLengthForLevel, BONUS_LIFE_EVERY, BONUS_ATTEMPTS_PER_LIFE } from '../logic/types';
 import type { GameState } from '../logic/types';
 import {
   createInitialGameState, handleKeyPress, applyAddGuess,
-  applyRemoveLetter, applyShowLetter,
+  applyRemoveLetter, applyShowLetter, applyBonusGuessesForLife,
 } from '../logic/gameEngine';
 import { getWordForLevel, loadValidWords, getDailyWord } from '../logic/wordLoader';
+import { getSeasonalWord, seasonalLevelField, SEASON_META, type SeasonKey } from '../logic/seasonalWordPacks';
 import { startRegenTimer, applyLivesRegen } from '../logic/livesRegen';
 import { localDateStr } from '../logic/progressStore';
 import { SoundManager } from '../logic/soundManager';
@@ -23,6 +24,8 @@ interface GameScreenProps {
   level: number;
   isReplay?: boolean;
   isDailyChallenge?: boolean;
+  /** When set, this is a seasonal pack game — overrides word source & win logic */
+  seasonKey?: string;
   progress: PlayerProgress;
   onProgressUpdate: (p: PlayerProgress) => void;
   onNavigate: (s: Screen) => void;
@@ -30,7 +33,7 @@ interface GameScreenProps {
 }
 
 const GameScreen: React.FC<GameScreenProps> = ({
-  difficulty, level, isReplay = false, isDailyChallenge = false,
+  difficulty, level, isReplay = false, isDailyChallenge = false, seasonKey,
   progress, onProgressUpdate, onNavigate, onBack,
 }) => {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -61,7 +64,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
   }, [progress.sfxEnabled, progress.sfxVolume]);
 
   // ── Serialise/deserialise GameState (Set + Map aren't JSON-safe) ──────────
-  const saveKey = `${difficulty}-${level}`;
+  const saveKey = seasonKey ? `${seasonKey}-${level}` : `${difficulty}-${level}`;
 
   function serializeGameState(gs: GameState): Record<string, unknown> {
     return {
@@ -109,15 +112,27 @@ const GameScreen: React.FC<GameScreenProps> = ({
         return;
       }
 
-      const wordLen = wordLengthForLevel(difficulty, level);
+      const wordLen = seasonKey ? 5 : wordLengthForLevel(difficulty, level);
       const d = new Date();
       const today = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-      const [entry, vw] = await Promise.all([
-        isDailyChallenge
-          ? getDailyWord(today, wordLen)
-          : getWordForLevel(wordLen, level),
-        loadValidWords(),
-      ]);
+
+      let entry: { word: string; definition: string };
+      let vw: Set<string>;
+      if (seasonKey) {
+        [entry, vw] = await Promise.all([
+          Promise.resolve({ word: getSeasonalWord(seasonKey as SeasonKey, level), definition: '' }),
+          loadValidWords(),
+        ]);
+      } else {
+        const [e, v] = await Promise.all([
+          isDailyChallenge
+            ? getDailyWord(today, wordLen)
+            : getWordForLevel(wordLen, level),
+          loadValidWords(),
+        ]);
+        entry = e;
+        vw = v;
+      }
 
       if (cancelled) return;
 
@@ -141,7 +156,9 @@ const GameScreen: React.FC<GameScreenProps> = ({
         }
       }
 
-      setGameState(createInitialGameState(difficulty, level, entry.word, entry.definition, isReplay));
+      // For seasonal levels, use 'regular' difficulty settings (5-letter, 6 guesses)
+      const effectiveDifficulty = seasonKey ? 'regular' : difficulty;
+      setGameState(createInitialGameState(effectiveDifficulty, level, entry.word, entry.definition, isReplay));
       gameLoadedRef.current = true;
       setDefinitionUsed(false);
 
@@ -154,7 +171,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
     })();
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [difficulty, level, isReplay]);
+  }, [difficulty, level, isReplay, seasonKey]);
 
   // Countdown timer tick
   useEffect(() => {
@@ -237,6 +254,27 @@ const GameScreen: React.FC<GameScreenProps> = ({
   const handleWin = () => {
     if (!gameState) return;
     const { coinsEarned, starsEarned } = gameState;
+
+    // ── Seasonal pack win ────────────────────────────────────────────────────
+    if (seasonKey) {
+      const field = seasonalLevelField(seasonKey as SeasonKey) as keyof PlayerProgress;
+      const currentSeasonal = (progress[field] as number) ?? 1;
+      const newSeasonalLevel = level >= currentSeasonal ? level + 1 : currentSeasonal;
+      // Bonus life every 5 levels completed
+      const newCompleted = (progress.totalLevelsCompleted ?? 0) + 1;
+      const earnedBonusLife = newCompleted % 5 === 0;
+      onProgressUpdate({
+        ...progress,
+        coins: progress.coins + coinsEarned,
+        lives: earnedBonusLife ? progress.lives + 1 : progress.lives,
+        [field]: newSeasonalLevel,
+        totalWins: progress.totalWins + 1,
+        totalLevelsCompleted: newCompleted,
+        totalGuesses: progress.totalGuesses + gameState.completedGuesses.length,
+        savedGameState: null,
+      });
+      return;
+    }
 
     if (isDailyChallenge) {
       const lenMap: Record<string, 4|5|6> = { easy: 4, regular: 5, hard: 6, vip: 6 };
@@ -327,7 +365,29 @@ const GameScreen: React.FC<GameScreenProps> = ({
       onNavigate({ name: 'dailyChallenge' });
       return;
     }
+    if (seasonKey) {
+      onNavigate({ name: 'seasonalGame', seasonKey, level: level + 1 });
+      return;
+    }
     onNavigate({ name: 'game', difficulty, level: level + 1 });
+  };
+
+  const handleUseLife = () => {
+    if (progress.lives <= 0) return;
+    const updated = { ...progress, lives: progress.lives - 1 };
+    onProgressUpdate(updated);
+    setGameState(prev => prev ? applyBonusGuessesForLife(prev) : prev);
+  };
+
+  const handleUseCoinsForContinue = () => {
+    if (progress.coins < 1000) return;
+    const bonus = BONUS_ATTEMPTS_PER_LIFE[difficulty];
+    const updated = { ...progress, coins: progress.coins - 1000 };
+    onProgressUpdate(updated);
+    setGameState(prev => prev
+      ? { ...prev, maxGuesses: prev.maxGuesses + bonus, status: 'IN_PROGRESS' as const }
+      : prev
+    );
   };
 
   const handleNoLivesTradeCoins = () => {
@@ -346,8 +406,9 @@ const GameScreen: React.FC<GameScreenProps> = ({
     window.location.reload();
   };
 
-  const accent = DIFFICULTY_ACCENT[difficulty];
-  const isVip = difficulty === 'vip';
+  const accent = seasonKey ? (SEASON_META[seasonKey as SeasonKey]?.accent ?? DIFFICULTY_ACCENT[difficulty]) : DIFFICULTY_ACCENT[difficulty];
+  const modeLabel = seasonKey ? (SEASON_META[seasonKey as SeasonKey]?.emoji + ' ' + SEASON_META[seasonKey as SeasonKey]?.label) : DIFFICULTY_LABELS[difficulty];
+  const isVip = !seasonKey && difficulty === 'vip';
 
   if (showNoLives) {
     return (
@@ -389,7 +450,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
               className="text-xs font-semibold px-2 py-0.5 rounded-full"
               style={{ backgroundColor: accent + '33', color: accent }}
             >
-              {DIFFICULTY_LABELS[difficulty]}
+              {modeLabel}
             </span>
             <div className="flex-1" />
             <span className="text-coinGold text-xs font-semibold">🪙 {progress.coins.toLocaleString()}</span>
@@ -409,7 +470,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
                   className="ml-2 text-sm font-semibold px-2.5 py-0.5 rounded-full"
                   style={{ backgroundColor: accent + '33', color: accent }}
                 >
-                  {DIFFICULTY_LABELS[difficulty]}
+                  {modeLabel}
                 </span>
               </div>
               <div className="flex items-center gap-1 text-sm">
@@ -509,8 +570,12 @@ const GameScreen: React.FC<GameScreenProps> = ({
       {/* Need more guesses dialog */}
       {gameState.status === 'OUT_OF_GUESSES' && (
         <NeedMoreGuessesDialog
-          addGuessItems={progress.addGuessItems}
+          difficulty={difficulty}
+          lives={progress.lives}
           coins={progress.coins}
+          addGuessItems={progress.addGuessItems}
+          onUseLife={handleUseLife}
+          onUseCoinsForContinue={handleUseCoinsForContinue}
           onUseItem={() => {
             handleAddGuess();
             onProgressUpdate({ ...progress, addGuessItems: progress.addGuessItems - 1 });

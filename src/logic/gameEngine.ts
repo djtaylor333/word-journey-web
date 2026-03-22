@@ -1,6 +1,7 @@
 import type { TileState, CompletedGuess, GameState, Difficulty } from './types';
-import { BONUS_LIFE_EVERY } from './types';
+import { BONUS_LIFE_EVERY, DIFFICULTY_MAX_GUESSES, BONUS_ATTEMPTS_PER_LIFE } from './types';
 
+/** @deprecated Use DIFFICULTY_MAX_GUESSES[difficulty] for per-difficulty max guesses. */
 export const MAX_GUESSES = 6;
 
 // ─── Wordle Evaluation ────────────────────────────────────────────────────────
@@ -103,7 +104,7 @@ export function createInitialGameState(
     definition,
     completedGuesses: [],
     currentInput: [],
-    maxGuesses: MAX_GUESSES,
+    maxGuesses: DIFFICULTY_MAX_GUESSES[difficulty],
     keyStates: {},
     removedLetters: new Set(),
     prefilledPositions: new Map(),
@@ -215,6 +216,16 @@ function submitGuess(state: GameState, validWords: Set<string>): GameState {
 export function applyAddGuess(state: GameState): GameState {
   if (state.status !== 'OUT_OF_GUESSES' && state.status !== 'IN_PROGRESS') return state;
   return { ...state, maxGuesses: state.maxGuesses + 1, status: 'IN_PROGRESS' };
+}
+
+/**
+ * Spend a life to get BONUS_ATTEMPTS_PER_LIFE[difficulty] extra guesses.
+ * Use instead of applyAddGuess when the player chooses to spend a life.
+ */
+export function applyBonusGuessesForLife(state: GameState): GameState {
+  if (state.status !== 'OUT_OF_GUESSES' && state.status !== 'IN_PROGRESS') return state;
+  const bonus = BONUS_ATTEMPTS_PER_LIFE[state.difficulty];
+  return { ...state, maxGuesses: state.maxGuesses + bonus, status: 'IN_PROGRESS' };
 }
 
 // ─── Apply Item: Remove a Letter ──────────────────────────────────────────────

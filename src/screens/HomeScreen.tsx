@@ -4,6 +4,7 @@ import type { PlayerProgress, Screen, Difficulty } from '../logic/types';
 import { DIFFICULTY_ACCENT, DIFFICULTY_LABELS } from '../logic/types';
 import LivesDisplay from '../components/LivesDisplay';
 import LockOverlay from '../components/LockOverlay';
+import { SEASON_KEYS, SEASON_META, seasonalLevelField, type SeasonKey } from '../logic/seasonalWordPacks';
 
 interface HomeScreenProps {
   progress: PlayerProgress;
@@ -145,6 +146,43 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
             </div>
             {allDailyDone && <span className="text-tileCorrect text-lg">✓</span>}
             {needsDaily && <span className="text-coinGold text-lg">▶</span>}
+          </button>
+        </section>
+
+        {/* Themed Level Packs */}
+        <section>
+          <h2 className="text-onSurface/70 text-sm font-bold uppercase tracking-widest mb-3">🎭 Themed Packs</h2>
+          {/* Quick-play strip: 6 season icons */}
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            {SEASON_KEYS.map(sk => {
+              const meta = SEASON_META[sk as SeasonKey];
+              const field = seasonalLevelField(sk as SeasonKey) as keyof PlayerProgress;
+              const level = (progress[field] as number) ?? 1;
+              return (
+                <button
+                  key={sk}
+                  onClick={() => onNavigate({ name: 'seasonalGame', seasonKey: sk, level })}
+                  className="flex flex-col items-center p-3 rounded-xl bg-surface border transition-all active:scale-95"
+                  style={{ borderColor: meta.accent + '40' }}
+                >
+                  <span className="text-2xl mb-0.5">{meta.emoji}</span>
+                  <span className="text-xs font-semibold" style={{ color: meta.accent }}>
+                    Lv {level}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <button
+            onClick={() => onNavigate({ name: 'themedPacks' })}
+            className="w-full flex items-center gap-4 p-4 rounded-2xl bg-surface border border-borderFilled/50 hover:border-primary/40 transition-all active:scale-[0.98]"
+          >
+            <span className="text-3xl">🎭</span>
+            <div className="flex-1 text-left">
+              <div className="font-bold text-onBg text-sm">Browse All Themed Packs</div>
+              <div className="text-onSurface/50 text-xs">6 seasons · 100 levels each · 5-letter words</div>
+            </div>
+            <span className="text-onSurface/40">▶</span>
           </button>
         </section>
 

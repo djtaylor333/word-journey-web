@@ -29,6 +29,22 @@ export const BONUS_LIFE_EVERY: Record<Difficulty, number> = {
   vip: 5,
 };
 
+/** Maximum guesses per difficulty (EASY gets 2 extra to ease players in) */
+export const DIFFICULTY_MAX_GUESSES: Record<Difficulty, number> = {
+  easy: 8,
+  regular: 6,
+  hard: 6,
+  vip: 6,
+};
+
+/** Extra guesses granted when spending a life mid-level */
+export const BONUS_ATTEMPTS_PER_LIFE: Record<Difficulty, number> = {
+  easy: 3,
+  regular: 2,
+  hard: 1,
+  vip: 2,
+};
+
 export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
   easy: 'Easy',
   regular: 'Regular',
@@ -162,6 +178,14 @@ export interface PlayerProgress {
 
   // Developer mode (hidden; unlocked in Settings)
   devModeEnabled: boolean;
+
+  // Seasonal themed level packs (1-based, wraps at 100)
+  seasonalEasterLevel: number;
+  seasonalValentinesLevel: number;
+  seasonalSummerLevel: number;
+  seasonalHalloweenLevel: number;
+  seasonalThanksgivingLevel: number;
+  seasonalChristmasLevel: number;
 }
 
 // ─── Store ────────────────────────────────────────────────────────────────────
@@ -196,7 +220,9 @@ export type Screen =
   | { name: 'timerMode' }
   | { name: 'store'; tab?: string }
   | { name: 'statistics' }
-  | { name: 'settings' };
+  | { name: 'settings' }
+  | { name: 'themedPacks' }
+  | { name: 'seasonalGame'; seasonKey: string; level: number; isReplay?: boolean };
 
 // ─── Word Entry ───────────────────────────────────────────────────────────────
 export interface WordEntry {

@@ -2,7 +2,8 @@
  * Unit tests for gameEngine.ts
  * Covers: evaluateGuess, mergeKeyStates, starsFromGuesses, coinsForWin,
  *         createInitialGameState, handleKeyPress, buildFullInput,
- *         applyAddGuess, applyRemoveLetter, applyShowLetter, shouldAwardBonusLife
+ *         applyAddGuess, applyBonusGuessesForLife, applyRemoveLetter,
+ *         applyShowLetter, shouldAwardBonusLife
  */
 import {
   evaluateGuess,
@@ -13,11 +14,13 @@ import {
   handleKeyPress,
   buildFullInput,
   applyAddGuess,
+  applyBonusGuessesForLife,
   applyRemoveLetter,
   applyShowLetter,
   shouldAwardBonusLife,
   MAX_GUESSES,
 } from './gameEngine';
+import { DIFFICULTY_MAX_GUESSES, BONUS_ATTEMPTS_PER_LIFE } from './types';
 import type { GameState } from './types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -157,9 +160,16 @@ describe('createInitialGameState', () => {
     expect(state.completedGuesses).toHaveLength(0);
   });
 
-  it('sets maxGuesses to MAX_GUESSES (6)', () => {
-    const state = createInitialGameState('easy', 1, 'WORDS', '');
-    expect(state.maxGuesses).toBe(MAX_GUESSES);
+  it('sets maxGuesses from DIFFICULTY_MAX_GUESSES (easy=8)', () => {
+    const easyState = createInitialGameState('easy', 1, 'ABLE', '');
+    expect(easyState.maxGuesses).toBe(8);
+    expect(easyState.maxGuesses).toBe(DIFFICULTY_MAX_GUESSES['easy']);
+  });
+
+  it('sets maxGuesses to 6 for regular/hard/vip', () => {
+    expect(createInitialGameState('regular', 1, 'WORDS', '').maxGuesses).toBe(6);
+    expect(createInitialGameState('hard', 1, 'TRACKS', '').maxGuesses).toBe(6);
+    expect(createInitialGameState('vip', 1, 'FLAME', '').maxGuesses).toBe(6);
   });
 });
 
@@ -267,6 +277,36 @@ describe('applyAddGuess', () => {
   it('does nothing on WON game', () => {
     const state = makeGame('CRANE', { status: 'WON' });
     const next = applyAddGuess(state);
+    expect(next).toBe(state);
+  });
+});
+
+// ─── applyBonusGuessesForLife ─────────────────────────────────────────────────
+describe('applyBonusGuessesForLife', () => {
+  it('grants BONUS_ATTEMPTS_PER_LIFE guesses for easy (3)', () => {
+    const state = makeGame('ABLE', { difficulty: 'easy', status: 'OUT_OF_GUESSES', maxGuesses: 8 });
+    const next = applyBonusGuessesForLife(state);
+    expect(next.maxGuesses).toBe(8 + BONUS_ATTEMPTS_PER_LIFE['easy']); // 11
+    expect(next.status).toBe('IN_PROGRESS');
+  });
+
+  it('grants BONUS_ATTEMPTS_PER_LIFE guesses for regular (2)', () => {
+    const state = makeGame('CRANE', { difficulty: 'regular', status: 'OUT_OF_GUESSES', maxGuesses: 6 });
+    const next = applyBonusGuessesForLife(state);
+    expect(next.maxGuesses).toBe(6 + BONUS_ATTEMPTS_PER_LIFE['regular']); // 8
+    expect(next.status).toBe('IN_PROGRESS');
+  });
+
+  it('grants BONUS_ATTEMPTS_PER_LIFE guesses for hard (1)', () => {
+    const state = makeGame('TRACKS', { difficulty: 'hard', status: 'OUT_OF_GUESSES', maxGuesses: 6 });
+    const next = applyBonusGuessesForLife(state);
+    expect(next.maxGuesses).toBe(7); // 6 + 1
+    expect(next.status).toBe('IN_PROGRESS');
+  });
+
+  it('does nothing on WON game', () => {
+    const state = makeGame('CRANE', { status: 'WON' });
+    const next = applyBonusGuessesForLife(state);
     expect(next).toBe(state);
   });
 });
