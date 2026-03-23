@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useEffect } from 'react';
 import type { Difficulty, PlayerProgress, Screen } from '../logic/types';
-import { DIFFICULTY_LABELS, DIFFICULTY_ACCENT, getZone, wordLengthForLevel } from '../logic/types';
+import { DIFFICULTY_LABELS, DIFFICULTY_ACCENT, getZone, wordLengthForLevel, MAX_ADVENTURE_LEVELS } from '../logic/types';
 import LivesDisplay from '../components/LivesDisplay';
 
 interface LevelSelectScreenProps {
@@ -40,7 +40,8 @@ const LevelSelectScreen: React.FC<LevelSelectScreenProps> = ({
     return progress.vipLevel;
   })();
 
-  const totalLevels = Math.max(currentLevel + 5, 30);
+  // Show up to MAX_ADVENTURE_LEVELS (500); always reveal 5 levels ahead of current
+  const totalLevels = Math.min(Math.max(currentLevel + 5, 30), MAX_ADVENTURE_LEVELS);
   const zone = getZone(currentLevel);
   const isVip = difficulty === 'vip';
 

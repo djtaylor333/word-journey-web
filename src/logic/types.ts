@@ -240,22 +240,73 @@ export interface Zone {
   pathColor: string;
 }
 
+// 50 unique zones — 10 levels each = 500 levels total
 export const ZONES: Zone[] = [
-  { name: 'Enchanted Meadow', emoji: '🌿', bgFrom: '#0D2B1D', bgTo: '#1A3D2B', pathColor: '#2DD4BF' },
-  { name: 'Crystal Cavern',   emoji: '💎', bgFrom: '#101835', bgTo: '#1E2B5E', pathColor: '#67E8F9' },
-  { name: 'Sunset Desert',    emoji: '🏜️', bgFrom: '#2B1800', bgTo: '#4A2C00', pathColor: '#F59E0B' },
-  { name: 'Frozen Peaks',     emoji: '🏔️', bgFrom: '#0A1A2A', bgTo: '#102840', pathColor: '#BAE6FD' },
-  { name: 'Volcanic Core',    emoji: '🌋', bgFrom: '#2B0800', bgTo: '#4A1200', pathColor: '#EF4444' },
-  { name: 'Mystic Forest',    emoji: '🌲', bgFrom: '#0B2210', bgTo: '#163520', pathColor: '#86EFAC' },
-  { name: 'Starlit Sky',      emoji: '🌌', bgFrom: '#0A0A1F', bgTo: '#14143A', pathColor: '#A78BFA' },
-  { name: 'Ocean Depths',     emoji: '🌊', bgFrom: '#001826', bgTo: '#003045', pathColor: '#22D3EE' },
-  { name: 'Ancient Ruins',    emoji: '🏛️', bgFrom: '#1A1400', bgTo: '#302600', pathColor: '#D97706' },
-  { name: 'Dragon\'s Summit', emoji: '🐉', bgFrom: '#1A0A00', bgTo: '#351500', pathColor: '#F97316' },
+  // ── World 1: Beginnings (1–100) ──────────────────────────────────────────
+  { name: 'Enchanted Meadow',  emoji: '🌿', bgFrom: '#0D2B1D', bgTo: '#1A3D2B', pathColor: '#2DD4BF' },
+  { name: 'Crystal Cavern',    emoji: '💎', bgFrom: '#101835', bgTo: '#1E2B5E', pathColor: '#67E8F9' },
+  { name: 'Sunset Desert',     emoji: '🏜️', bgFrom: '#2B1800', bgTo: '#4A2C00', pathColor: '#F59E0B' },
+  { name: 'Frozen Peaks',      emoji: '🏔️', bgFrom: '#0A1A2A', bgTo: '#102840', pathColor: '#BAE6FD' },
+  { name: 'Volcanic Core',     emoji: '🌋', bgFrom: '#2B0800', bgTo: '#4A1200', pathColor: '#EF4444' },
+  { name: 'Mystic Forest',     emoji: '🌲', bgFrom: '#0B2210', bgTo: '#163520', pathColor: '#86EFAC' },
+  { name: 'Starlit Sky',       emoji: '🌌', bgFrom: '#0A0A1F', bgTo: '#14143A', pathColor: '#A78BFA' },
+  { name: 'Ocean Depths',      emoji: '🌊', bgFrom: '#001826', bgTo: '#003045', pathColor: '#22D3EE' },
+  { name: 'Ancient Ruins',     emoji: '🏛️', bgFrom: '#1A1400', bgTo: '#302600', pathColor: '#D97706' },
+  { name: "Dragon's Summit",   emoji: '🐉', bgFrom: '#1A0A00', bgTo: '#351500', pathColor: '#F97316' },
+  // ── World 2: Wild Frontiers (101–200) ────────────────────────────────────
+  { name: 'Jungle Canopy',     emoji: '🦜', bgFrom: '#0A2410', bgTo: '#143520', pathColor: '#4ADE80' },
+  { name: 'Thunder Plains',    emoji: '⚡', bgFrom: '#18181A', bgTo: '#2A2A35', pathColor: '#FDE047' },
+  { name: 'Coral Reef',        emoji: '🪸', bgFrom: '#001A28', bgTo: '#003040', pathColor: '#F472B6' },
+  { name: 'Moonlit Marsh',     emoji: '🌙', bgFrom: '#0A0A18', bgTo: '#14141F', pathColor: '#C084FC' },
+  { name: 'Sky Temple',        emoji: '☁️', bgFrom: '#0A1830', bgTo: '#102240', pathColor: '#E0F2FE' },
+  { name: 'Ember Fields',      emoji: '🔥', bgFrom: '#2A0A00', bgTo: '#3D1000', pathColor: '#FB923C' },
+  { name: 'Mushroom Kingdom',  emoji: '🍄', bgFrom: '#1A0A18', bgTo: '#2E1228', pathColor: '#F9A8D4' },
+  { name: 'Sapphire Lake',     emoji: '💙', bgFrom: '#001830', bgTo: '#002844', pathColor: '#38BDF8' },
+  { name: 'Iron Citadel',      emoji: '⚔️', bgFrom: '#141414', bgTo: '#202020', pathColor: '#94A3B8' },
+  { name: 'Rainbow Valley',    emoji: '🌈', bgFrom: '#10101A', bgTo: '#1A1A28', pathColor: '#F472B6' },
+  // ── World 3: Ancient Wonders (201–300) ───────────────────────────────────
+  { name: 'Sandstone Maze',    emoji: '🏺', bgFrom: '#281800', bgTo: '#402800', pathColor: '#FCD34D' },
+  { name: 'Blizzard Pass',     emoji: '❄️', bgFrom: '#081828', bgTo: '#0D2035', pathColor: '#BAE6FD' },
+  { name: 'Fairy Glen',        emoji: '🧚', bgFrom: '#1A041A', bgTo: '#2E082E', pathColor: '#F0ABFC' },
+  { name: 'Shipwreck Cove',    emoji: '⚓', bgFrom: '#001428', bgTo: '#001F3A', pathColor: '#6EE7B7' },
+  { name: 'Clouded Spire',     emoji: '🌫️', bgFrom: '#181820', bgTo: '#22222E', pathColor: '#CBD5E1' },
+  { name: 'Gilded Palace',     emoji: '👑', bgFrom: '#201400', bgTo: '#341E00', pathColor: '#FDE68A' },
+  { name: 'Dark Labyrinth',    emoji: '🕯️', bgFrom: '#100808', bgTo: '#1A0E0E', pathColor: '#FCA5A5' },
+  { name: 'Cherry Blossom',    emoji: '🌸', bgFrom: '#30142A', bgTo: '#441E3C', pathColor: '#FDA4AF' },
+  { name: 'Haunted Hollow',    emoji: '👻', bgFrom: '#0E0814', bgTo: '#1A1022', pathColor: '#C4B5FD' },
+  { name: 'Sunken Temple',     emoji: '🐚', bgFrom: '#001C28', bgTo: '#002C3C', pathColor: '#5EEAD4' },
+  // ── World 4: Elemental Realms (301–400) ──────────────────────────────────
+  { name: 'Wisteria Woods',    emoji: '🪻', bgFrom: '#1A0A2E', bgTo: '#26103E', pathColor: '#D8B4FE' },
+  { name: 'Storm Coast',       emoji: '⛈️', bgFrom: '#0A101A', bgTo: '#101828', pathColor: '#60A5FA' },
+  { name: 'Crystal Tundra',    emoji: '🧊', bgFrom: '#061216', bgTo: '#0C1E24', pathColor: '#A5F3FC' },
+  { name: 'Ember Lair',        emoji: '🐲', bgFrom: '#200500', bgTo: '#380D00', pathColor: '#FCA5A5' },
+  { name: 'Eternal Garden',    emoji: '🌺', bgFrom: '#0D1F10', bgTo: '#163018', pathColor: '#86EFAC' },
+  { name: 'Space Station',     emoji: '🚀', bgFrom: '#020408', bgTo: '#060C14', pathColor: '#818CF8' },
+  { name: 'Floating Islands',  emoji: '🏝️', bgFrom: '#061428', bgTo: '#0C2040', pathColor: '#34D399' },
+  { name: 'Phoenix Peaks',     emoji: '🦅', bgFrom: '#280800', bgTo: '#401200', pathColor: '#FDBA74' },
+  { name: 'Shadow Realm',      emoji: '🌑', bgFrom: '#040408', bgTo: '#08080E', pathColor: '#A78BFA' },
+  { name: 'Amber Savanna',     emoji: '🦁', bgFrom: '#201400', bgTo: '#302000', pathColor: '#FBD38D' },
+  // ── World 5: Legendary Endgame (401–500) ─────────────────────────────────
+  { name: 'Frost Cathedral',   emoji: '🕍', bgFrom: '#061020', bgTo: '#0E1A30', pathColor: '#E0F2FE' },
+  { name: 'Hidden Oasis',      emoji: '🌴', bgFrom: '#0A1E0A', bgTo: '#122A12', pathColor: '#86EFAC' },
+  { name: 'Clockwork City',    emoji: '⚙️', bgFrom: '#141010', bgTo: '#201A1A', pathColor: '#D1FAE5' },
+  { name: 'Underwater Cave',   emoji: '🐠', bgFrom: '#001420', bgTo: '#001E30', pathColor: '#67E8F9' },
+  { name: 'Sky Fortress',      emoji: '🏰', bgFrom: '#0A0C14', bgTo: '#12141E', pathColor: '#C7D2FE' },
+  { name: 'Prism Canyon',      emoji: '🌈', bgFrom: '#1A0A18', bgTo: '#2A1028', pathColor: '#F9A8D4' },
+  { name: 'Mystic Swamp',      emoji: '🐊', bgFrom: '#0A1A08', bgTo: '#122410', pathColor: '#6EE7B7' },
+  { name: "Titan's Peak",      emoji: '🗿', bgFrom: '#181010', bgTo: '#241818', pathColor: '#CBD5E1' },
+  { name: 'Celestial Gate',    emoji: '✨', bgFrom: '#100A20', bgTo: '#180F30', pathColor: '#FDE68A' },
+  { name: 'Eternal Summit',    emoji: '⛰️', bgFrom: '#060A10', bgTo: '#0A0E18', pathColor: '#FBBF24' },
 ];
 
+/** Returns the zone for a given 1-based level (capped at 500 levels / 50 zones). */
 export function getZone(level: number): Zone {
-  return ZONES[Math.floor((level - 1) / 10) % ZONES.length];
+  const idx = Math.min(Math.floor((level - 1) / 10), ZONES.length - 1);
+  return ZONES[idx];
 }
+
+/** Total number of playable adventure levels per difficulty */
+export const MAX_ADVENTURE_LEVELS = 500;
 
 // ─── Seasonal Zone Maps ────────────────────────────────────────────────────────
 // Each seasonal pack has 10 uniquely-themed zones replacing the standard adventure zones.

@@ -72,8 +72,8 @@ describe('LevelSelectScreen zigzag path logic', () => {
       expect(getCol(21)).toBe(1);
     });
 
-    it('returns valid column index 0, 1, or 2 for any level 1-100', () => {
-      for (let lv = 1; lv <= 100; lv++) {
+    it('returns valid column index 0, 1, or 2 for any level 1-500', () => {
+      for (let lv = 1; lv <= 500; lv++) {
         const col = getCol(lv);
         expect([0, 1, 2]).toContain(col);
       }
@@ -184,5 +184,88 @@ describe('LevelSelectScreen zigzag path logic', () => {
       }
       expect(bannerLevels).toEqual([1, 11, 21, 31]);
     });
+
+    it('exactly 50 zone banners appear across 500 levels', () => {
+      const bannerLevels: number[] = [];
+      for (let lv = 1; lv <= 500; lv++) {
+        if ((lv - 1) % 10 === 0) bannerLevels.push(lv);
+      }
+      expect(bannerLevels.length).toBe(50);
+      expect(bannerLevels[0]).toBe(1);
+      expect(bannerLevels[49]).toBe(491);
+    });
+  });
+});
+
+// ── 500-level zone coverage ───────────────────────────────────────────────────
+// Import-free tests of the getZone / ZONES index math
+
+const ZONES_COUNT = 50; // must match types.ts ZONES.length
+
+function getZoneIndex(level: number): number {
+  return Math.min(Math.floor((level - 1) / 10), ZONES_COUNT - 1);
+}
+
+describe('getZone — 50-zone coverage for 500 levels', () => {
+  it('level 1 maps to zone index 0 (zone 1)', () => {
+    expect(getZoneIndex(1)).toBe(0);
+  });
+
+  it('level 10 maps to zone index 0', () => {
+    expect(getZoneIndex(10)).toBe(0);
+  });
+
+  it('level 11 maps to zone index 1', () => {
+    expect(getZoneIndex(11)).toBe(1);
+  });
+
+  it('level 100 maps to zone index 9', () => {
+    expect(getZoneIndex(100)).toBe(9);
+  });
+
+  it('level 101 maps to zone index 10 (World 2)', () => {
+    expect(getZoneIndex(101)).toBe(10);
+  });
+
+  it('level 200 maps to zone index 19', () => {
+    expect(getZoneIndex(200)).toBe(19);
+  });
+
+  it('level 491 maps to zone index 49 (last zone)', () => {
+    expect(getZoneIndex(491)).toBe(49);
+  });
+
+  it('level 500 maps to zone index 49 (capped at last zone)', () => {
+    expect(getZoneIndex(500)).toBe(49);
+  });
+
+  it('levels 491-500 all map to the final zone (zone 50)', () => {
+    for (let lv = 491; lv <= 500; lv++) {
+      expect(getZoneIndex(lv)).toBe(49);
+    }
+  });
+
+  it('each zone covers exactly 10 consecutive levels (1-490)', () => {
+    for (let zone = 0; zone < 49; zone++) {
+      const firstLevel = zone * 10 + 1;
+      const lastLevel  = zone * 10 + 10;
+      for (let lv = firstLevel; lv <= lastLevel; lv++) {
+        expect(getZoneIndex(lv)).toBe(zone);
+      }
+    }
+  });
+
+  it('zone index never exceeds 49 for any level 1-500', () => {
+    for (let lv = 1; lv <= 500; lv++) {
+      expect(getZoneIndex(lv)).toBeLessThanOrEqual(49);
+    }
+  });
+
+  it('MAX_ADVENTURE_LEVELS = 500 gives 50 unique zones (10 levels each)', () => {
+    const zonesUsed = new Set<number>();
+    for (let lv = 1; lv <= 500; lv++) {
+      zonesUsed.add(getZoneIndex(lv));
+    }
+    expect(zonesUsed.size).toBe(50);
   });
 });
