@@ -20,6 +20,8 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'vip',      label: '👑 VIP' },
 ];
 
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.djtaylor.wordjourney';
+
 const StoreScreen: React.FC<StoreScreenProps> = ({ progress, onProgress, onBack }) => {
   const [tab, setTab] = useState<Tab>('items');
   const [lockMsg, setLockMsg] = useState<{ title: string; message: string } | null>(null);
@@ -130,7 +132,17 @@ const StoreScreen: React.FC<StoreScreenProps> = ({ progress, onProgress, onBack 
         )}
 
         {/* BUNDLES tab — Android only */}
-        {tab === 'bundles' && BUNDLES.map(b => (
+        {tab === 'bundles' && (
+          <>
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-accentRegular/10 border border-accentRegular/30 rounded-xl px-4 py-2.5 text-xs text-accentRegular font-semibold w-full justify-center"
+            >
+              🔗 Get the Android app for real purchases
+            </a>
+            {BUNDLES.map(b => (
           <div key={b.id} className="bg-surface rounded-2xl p-4 flex items-center gap-3">
             <span className="text-3xl">🎁</span>
             <div className="flex-1">
@@ -146,8 +158,21 @@ const StoreScreen: React.FC<StoreScreenProps> = ({ progress, onProgress, onBack 
           </div>
         ))}
 
+          </>
+        )}
+
         {/* COINS tab — Android only */}
-        {tab === 'coins' && COIN_PACKS.map(pack => (
+        {tab === 'coins' && (
+          <>
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-coinGold/10 border border-coinGold/30 rounded-xl px-4 py-2.5 text-xs text-coinGold font-semibold w-full justify-center"
+            >
+              🔗 Get the Android app to purchase coins
+            </a>
+            {COIN_PACKS.map(pack => (
           <div key={pack.id} className="bg-surface rounded-2xl p-4 flex items-center gap-3">
             <span className="text-3xl">🪙</span>
             <div className="flex-1">
@@ -163,8 +188,21 @@ const StoreScreen: React.FC<StoreScreenProps> = ({ progress, onProgress, onBack 
           </div>
         ))}
 
+          </>
+        )}
+
         {/* DIAMONDS tab — Android only */}
-        {tab === 'diamonds' && DIAMOND_PACKS.map(pack => (
+        {tab === 'diamonds' && (
+          <>
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-diamondBlue/10 border border-diamondBlue/30 rounded-xl px-4 py-2.5 text-xs text-diamondBlue font-semibold w-full justify-center"
+            >
+              🔗 Get the Android app to purchase diamonds
+            </a>
+            {DIAMOND_PACKS.map(pack => (
           <div key={pack.id} className="bg-surface rounded-2xl p-4 flex items-center gap-3">
             <span className="text-3xl">💎</span>
             <div className="flex-1">
@@ -179,13 +217,23 @@ const StoreScreen: React.FC<StoreScreenProps> = ({ progress, onProgress, onBack 
             </button>
           </div>
         ))}
+          </>
+        )}
 
         {/* VIP tab — Android only */}
         {tab === 'vip' && (
           <>
+            <a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-accentVip/10 border border-accentVip/30 rounded-xl px-4 py-2.5 text-xs text-accentVip font-semibold w-full justify-center"
+            >
+              🔗 Get the Android app to subscribe to VIP
+            </a>
             <div className="rounded-2xl p-4 text-center vip-shimmer bg-surface mb-2">
               <div className="text-3xl mb-1">👑</div>
-              <div className="font-bold text-accentVip text-lg">Word Journey VIP</div>
+              <div className="font-bold text-accentVip text-base sm:text-lg">Word Journey VIP</div>
               <div className="text-onSurface/70 text-xs mt-1">Unlimited lives · Exclusive themes · No ads · VIP word packs · 2× coins</div>
             </div>
             {VIP_PLANS.map(plan => (

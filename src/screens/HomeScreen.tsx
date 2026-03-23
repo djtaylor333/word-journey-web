@@ -111,13 +111,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate, onProgres
               { l: '?', c: 'bg-tileAbsent' },
               { l: '!', c: 'bg-tilePresent' },
             ].map(({ l, c }, i) => (
-              <div key={i} className={`w-16 h-16 flex items-center justify-center rounded-lg font-bold text-2xl text-white ${c}`}>
+              <div key={i} className={`w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center rounded-lg font-bold text-xl sm:text-2xl text-white ${c}`}>
                 {l}
               </div>
             ))}
           </div>
         </div>
-        <h1 className="text-4xl font-bold text-onBg" style={{ fontFamily: 'Georgia, serif' }}>
+        <h1 className="text-3xl sm:text-4xl font-bold text-onBg" style={{ fontFamily: 'Georgia, serif' }}>
           Word Journeys
         </h1>
         <p className="text-primary text-base font-medium mt-1">Conquer the Lexicon</p>
@@ -156,8 +156,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate, onProgres
                       VIP
                     </div>
                   )}
-                  <span className="text-3xl mb-1.5 animate-float">{emoji}</span>
-                  <span className="font-bold text-base" style={{ color: accent }}>
+                  <span className="text-2xl sm:text-3xl mb-1.5 animate-float">{emoji}</span>
+                  <span className="font-bold text-sm sm:text-base" style={{ color: accent }}>
                     {DIFFICULTY_LABELS[d]}
                   </span>
                   <span className="text-onSurface/50 text-xs text-center">{desc}</span>
@@ -173,9 +173,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate, onProgres
         <section>
           <h2 className="text-onSurface/70 text-sm font-bold uppercase tracking-widest mb-3">⭐ Star Levels</h2>
           <div className="flex items-center gap-4 p-5 rounded-2xl bg-surface border border-coinGold/30">
-            <span className="text-4xl">⭐</span>
+            <span className="text-3xl sm:text-4xl">⭐</span>
             <div className="flex-1">
-              <div className="font-bold text-coinGold text-base">Star Levels</div>
+              <div className="font-bold text-coinGold text-sm sm:text-base">Star Levels</div>
               <div className="text-onSurface/50 text-sm">Unlock by earning stars in Adventure</div>
               <div className="text-onSurface/40 text-xs mt-0.5">Special challenge levels — coming soon!</div>
             </div>
@@ -194,9 +194,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate, onProgres
               needsDaily ? 'border-accentRegular/50' : 'border-borderFilled/50'
             }`}
           >
-            <span className="text-4xl">📅</span>
+            <span className="text-3xl sm:text-4xl">📅</span>
             <div className="flex-1 text-left">
-              <div className="font-bold text-onBg text-base">Daily Challenge</div>
+              <div className="font-bold text-onBg text-sm sm:text-base">Daily Challenge</div>
               <div className="text-onSurface/60 text-sm">3 new words every day / 4, 5, and 6 letters</div>
               {progress.dailyStreak > 0 && (
                 <div className="text-accentHard text-xs font-bold mt-0.5">🔥 {progress.dailyStreak} day streak</div>
@@ -251,9 +251,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate, onProgres
             onClick={() => onNavigate({ name: 'timerMode' })}
             className="w-full flex items-center gap-4 p-5 rounded-2xl bg-surface border border-borderFilled/50 hover:border-accentHard/40 transition-all active:scale-[0.98]"
           >
-            <span className="text-4xl">⏱️</span>
+            <span className="text-3xl sm:text-4xl">⏱️</span>
             <div className="flex-1 text-left">
-              <div className="font-bold text-onBg text-base">Timer Mode</div>
+              <div className="font-bold text-onBg text-sm sm:text-base">Timer Mode</div>
               <div className="text-onSurface/60 text-sm">Solve as many words as you can before time runs out</div>
             </div>
             <span className="text-onSurface/40">▶</span>
