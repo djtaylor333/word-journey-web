@@ -17,6 +17,7 @@ import SettingsScreen    from '../screens/SettingsScreen';
 import OnboardingScreen  from '../screens/OnboardingScreen';
 import InboxScreen       from '../screens/InboxScreen';
 import ThemedPacksScreen from '../screens/ThemedPacksScreen';
+import SeasonalLevelSelectScreen from '../screens/SeasonalLevelSelectScreen';
 
 // Map daily word length → difficulty
 function diffForLen(n: number): Difficulty {
@@ -231,6 +232,17 @@ export default function App() {
   if (current.name === 'themedPacks') {
     return (
       <ThemedPacksScreen
+        progress={progress}
+        onNavigate={navigate}
+        onBack={goBack}
+      />
+    );
+  }
+
+  if (current.name === 'seasonalLevelSelect') {
+    return (
+      <SeasonalLevelSelectScreen
+        seasonKey={current.seasonKey}
         progress={progress}
         onNavigate={navigate}
         onBack={goBack}

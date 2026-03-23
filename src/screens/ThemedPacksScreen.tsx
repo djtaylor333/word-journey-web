@@ -51,7 +51,7 @@ const ThemedPacksScreen: React.FC<ThemedPacksScreenProps> = ({ progress, onNavig
           return (
             <button
               key={seasonKey}
-              onClick={() => onNavigate({ name: 'seasonalGame', seasonKey, level: isFinished ? packSize : currentLevel })}
+              onClick={() => onNavigate({ name: 'seasonalLevelSelect', seasonKey })}
               className="w-full text-left flex items-center gap-4 p-5 rounded-2xl bg-surface border transition-all active:scale-[0.98] hover:border-opacity-60"
               style={{ borderColor: meta.accent + '50' }}
             >

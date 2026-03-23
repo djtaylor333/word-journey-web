@@ -222,6 +222,7 @@ export type Screen =
   | { name: 'statistics' }
   | { name: 'settings' }
   | { name: 'themedPacks' }
+  | { name: 'seasonalLevelSelect'; seasonKey: string }
   | { name: 'seasonalGame'; seasonKey: string; level: number; isReplay?: boolean };
 
 // ─── Word Entry ───────────────────────────────────────────────────────────────
@@ -254,4 +255,100 @@ export const ZONES: Zone[] = [
 
 export function getZone(level: number): Zone {
   return ZONES[Math.floor((level - 1) / 10) % ZONES.length];
+}
+
+// ─── Seasonal Zone Maps ────────────────────────────────────────────────────────
+// Each seasonal pack has 10 uniquely-themed zones replacing the standard adventure zones.
+
+export const EASTER_ZONES: Zone[] = [
+  { name: 'Bunny Meadow',    emoji: '🐰', bgFrom: '#1A2810', bgTo: '#2E3D1A', pathColor: '#A3E635' },
+  { name: 'Egg Hunt Garden', emoji: '🥚', bgFrom: '#112118', bgTo: '#1E3A2A', pathColor: '#6EE7B7' },
+  { name: 'Chick Parade',    emoji: '🐣', bgFrom: '#211808', bgTo: '#3D3210', pathColor: '#FDE68A' },
+  { name: 'Daisy Fields',    emoji: '🌸', bgFrom: '#210D18', bgTo: '#3D1A2E', pathColor: '#F9A8D4' },
+  { name: 'Rainbow Bridge',  emoji: '🌈', bgFrom: '#0D1821', bgTo: '#1A2D3D', pathColor: '#7DD3FC' },
+  { name: 'Clover Hills',    emoji: '🍀', bgFrom: '#082110', bgTo: '#0D3D1A', pathColor: '#4ADE80' },
+  { name: 'Blossom Cave',    emoji: '🌺', bgFrom: '#210D0D', bgTo: '#3D1A1A', pathColor: '#FCA5A5' },
+  { name: 'Painted Eggs',    emoji: '🎨', bgFrom: '#180D21', bgTo: '#2A1A3D', pathColor: '#C084FC' },
+  { name: 'Spring Pond',     emoji: '🐸', bgFrom: '#081810', bgTo: '#0D2D1A', pathColor: '#86EFAC' },
+  { name: 'Easter Sunrise',  emoji: '🌅', bgFrom: '#211808', bgTo: '#3D2A10', pathColor: '#FDE68A' },
+];
+
+export const VALENTINES_ZONES: Zone[] = [
+  { name: 'Rose Garden',      emoji: '🌹', bgFrom: '#210810', bgTo: '#3D0D1A', pathColor: '#FDA4AF' },
+  { name: 'Love Meadow',      emoji: '💕', bgFrom: '#210D18', bgTo: '#3D1A2E', pathColor: '#E879F9' },
+  { name: 'Candy Hearts',     emoji: '🍬', bgFrom: '#180D21', bgTo: '#2E1A3D', pathColor: '#C084FC' },
+  { name: 'Lovebird Forest',  emoji: '🕊️', bgFrom: '#082118', bgTo: '#0D3D2A', pathColor: '#6EE7B7' },
+  { name: 'Chocolate Hills',  emoji: '🍫', bgFrom: '#210D08', bgTo: '#3D1A10', pathColor: '#FCA5A5' },
+  { name: 'Starry Romance',   emoji: '⭐', bgFrom: '#0D0D21', bgTo: '#1A1A3D', pathColor: '#818CF8' },
+  { name: 'Picnic Bluffs',    emoji: '🧺', bgFrom: '#1A2110', bgTo: '#2E3D1A', pathColor: '#A3E635' },
+  { name: 'Petal Cascade',    emoji: '🌸', bgFrom: '#211810', bgTo: '#3D2A1A', pathColor: '#FBBF24' },
+  { name: 'Heart Cove',       emoji: '💖', bgFrom: '#210818', bgTo: '#3D0D2D', pathColor: '#F9A8D4' },
+  { name: 'Valentine Peak',   emoji: '💝', bgFrom: '#210D0D', bgTo: '#3D1A1A', pathColor: '#FDA4AF' },
+];
+
+export const SUMMER_ZONES: Zone[] = [
+  { name: 'Sunny Beach',      emoji: '🏖️', bgFrom: '#211608', bgTo: '#3D2A0D', pathColor: '#FDE68A' },
+  { name: 'Coral Reef',       emoji: '🐠', bgFrom: '#081821', bgTo: '#0D2D3D', pathColor: '#67E8F9' },
+  { name: 'Tropical Forest',  emoji: '🌴', bgFrom: '#082110', bgTo: '#0D3D1A', pathColor: '#4ADE80' },
+  { name: 'Lemonade Stand',   emoji: '🍋', bgFrom: '#211808', bgTo: '#3D3210', pathColor: '#FDE68A' },
+  { name: 'BBQ Grounds',      emoji: '🔥', bgFrom: '#210D08', bgTo: '#3D1A0D', pathColor: '#FB923C' },
+  { name: 'Waterfall Oasis',  emoji: '💦', bgFrom: '#081818', bgTo: '#0D2D2D', pathColor: '#34D399' },
+  { name: 'Sprinkler Park',   emoji: '🌈', bgFrom: '#0D0D21', bgTo: '#1A1A3D', pathColor: '#7DD3FC' },
+  { name: 'Ice Cream Hills',  emoji: '🍦', bgFrom: '#210D18', bgTo: '#3D1A2E', pathColor: '#F9A8D4' },
+  { name: 'Festival Grounds', emoji: '🎆', bgFrom: '#210810', bgTo: '#3D0D1A', pathColor: '#FCA5A5' },
+  { name: 'Sunset Horizon',   emoji: '🌅', bgFrom: '#211808', bgTo: '#3D2810', pathColor: '#FBBF24' },
+];
+
+export const HALLOWEEN_ZONES: Zone[] = [
+  { name: 'Haunted Forest',   emoji: '🌲', bgFrom: '#0D0D08', bgTo: '#1A1A0D', pathColor: '#BEF264' },
+  { name: 'Pumpkin Patch',    emoji: '🎃', bgFrom: '#210D08', bgTo: '#3D1A0D', pathColor: '#FB923C' },
+  { name: 'Ghost Graveyard',  emoji: '👻', bgFrom: '#0D0D18', bgTo: '#1A1A2D', pathColor: '#818CF8' },
+  { name: "Witch's Cauldron", emoji: '🧙', bgFrom: '#081008', bgTo: '#0D1A0D', pathColor: '#4ADE80' },
+  { name: 'Vampire Castle',   emoji: '🏰', bgFrom: '#180810', bgTo: '#2D0D1A', pathColor: '#FDA4AF' },
+  { name: 'Skull Cavern',     emoji: '💀', bgFrom: '#100808', bgTo: '#1A0D0D', pathColor: '#F87171' },
+  { name: 'Candy Trail',      emoji: '🍬', bgFrom: '#210D21', bgTo: '#3D1A3D', pathColor: '#C084FC' },
+  { name: 'Spider Bog',       emoji: '🕷️', bgFrom: '#081008', bgTo: '#0D1A0D', pathColor: '#86EFAC' },
+  { name: 'Shadow Realm',     emoji: '🌑', bgFrom: '#080808', bgTo: '#0D0D0D', pathColor: '#94A3B8' },
+  { name: 'Halloween Peak',   emoji: '🎃', bgFrom: '#210D04', bgTo: '#3D1A08', pathColor: '#FBBF24' },
+];
+
+export const THANKSGIVING_ZONES: Zone[] = [
+  { name: 'Harvest Fields',   emoji: '🌾', bgFrom: '#211508', bgTo: '#3D2A0D', pathColor: '#FDE68A' },
+  { name: 'Apple Orchard',    emoji: '🍎', bgFrom: '#210D08', bgTo: '#3D1A0D', pathColor: '#FCA5A5' },
+  { name: 'Pilgrim Trail',    emoji: '🗺️', bgFrom: '#181208', bgTo: '#2A2010', pathColor: '#FCD34D' },
+  { name: 'Golden Meadow',    emoji: '🍁', bgFrom: '#211808', bgTo: '#3D2810', pathColor: '#FB923C' },
+  { name: 'Pumpkin Spice',    emoji: '☕', bgFrom: '#180E08', bgTo: '#2D1810', pathColor: '#FBBF24' },
+  { name: 'Turkey Valley',    emoji: '🦃', bgFrom: '#181A08', bgTo: '#2A3010', pathColor: '#A3E635' },
+  { name: 'Cranberry Bogs',   emoji: '🫐', bgFrom: '#210810', bgTo: '#3D0D1A', pathColor: '#FDA4AF' },
+  { name: 'Cornucopia Cave',  emoji: '🌽', bgFrom: '#211808', bgTo: '#3D2A10', pathColor: '#FBBF24' },
+  { name: 'Family Hearth',    emoji: '🔥', bgFrom: '#210D04', bgTo: '#3D1A08', pathColor: '#FB923C' },
+  { name: 'Gratitude Summit', emoji: '🌅', bgFrom: '#211810', bgTo: '#3D2A18', pathColor: '#FDE68A' },
+];
+
+export const CHRISTMAS_ZONES: Zone[] = [
+  { name: "Santa's Village",   emoji: '🎅', bgFrom: '#210808', bgTo: '#3D0D0D', pathColor: '#FCA5A5' },
+  { name: 'Winter Wonderland', emoji: '❄️', bgFrom: '#081821', bgTo: '#0D2D3D', pathColor: '#7DD3FC' },
+  { name: 'Gift Grotto',       emoji: '🎁', bgFrom: '#210810', bgTo: '#3D0D1A', pathColor: '#FDA4AF' },
+  { name: 'Candy Cane Lane',   emoji: '🍬', bgFrom: '#210D0D', bgTo: '#3D1A1A', pathColor: '#FCA5A5' },
+  { name: 'Christmas Forest',  emoji: '🎄', bgFrom: '#081808', bgTo: '#0D2D10', pathColor: '#4ADE80' },
+  { name: 'Elf Workshop',      emoji: '🧝', bgFrom: '#082108', bgTo: '#0D3D0D', pathColor: '#86EFAC' },
+  { name: 'Frozen Lake',       emoji: '🏒', bgFrom: '#081821', bgTo: '#0D2A3D', pathColor: '#67E8F9' },
+  { name: 'Reindeer Run',      emoji: '🦌', bgFrom: '#181408', bgTo: '#2D2010', pathColor: '#FBBF24' },
+  { name: 'Fireplace Hollow',  emoji: '🔥', bgFrom: '#210D04', bgTo: '#3D1A08', pathColor: '#FB923C' },
+  { name: 'North Pole Peak',   emoji: '⭐', bgFrom: '#0D0D21', bgTo: '#1A1A3D', pathColor: '#818CF8' },
+];
+
+const SEASONAL_ZONE_MAP: Record<string, Zone[]> = {
+  easter:       EASTER_ZONES,
+  valentines:   VALENTINES_ZONES,
+  summer:       SUMMER_ZONES,
+  halloween:    HALLOWEEN_ZONES,
+  thanksgiving: THANKSGIVING_ZONES,
+  christmas:    CHRISTMAS_ZONES,
+};
+
+/** Returns the zone theme for [level] within a seasonal pack, or standard adventure zones. */
+export function getSeasonalZone(seasonKey: string, level: number): Zone {
+  const zoneList = SEASONAL_ZONE_MAP[seasonKey] ?? ZONES;
+  return zoneList[Math.floor((level - 1) / 10) % 10];
 }
