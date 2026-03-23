@@ -269,7 +269,10 @@ const GameScreen: React.FC<GameScreenProps> = ({
   const handleWin = () => {
     if (!gameState) return;
     const { coinsEarned, starsEarned } = gameState;
-
+    // Increment review counter for every win (timer mode has its own screen so never reaches here)
+    const reviewCount = !progress.hasReviewBeenRequested
+      ? (progress.levelsCompletedForReview ?? 0) + 1
+      : (progress.levelsCompletedForReview ?? 0);
     // ── Seasonal pack win ────────────────────────────────────────────────────
     if (seasonKey) {
       const field = seasonalLevelField(seasonKey as SeasonKey) as keyof PlayerProgress;
@@ -287,6 +290,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
         totalLevelsCompleted: newCompleted,
         totalGuesses: progress.totalGuesses + gameState.completedGuesses.length,
         savedGameState: null,
+        levelsCompletedForReview: reviewCount,
       });
       return;
     }
@@ -338,6 +342,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
         [starsField]: Math.max(prevStars, starsEarned),
         dailyStreak: newGlobalStreak,
         dailyBestStreak: Math.max(progress.dailyBestStreak, newGlobalStreak),
+        levelsCompletedForReview: reviewCount,
       };
       onProgressUpdate(updated);
       return;
@@ -371,6 +376,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
       totalLevelsCompleted: progress.totalLevelsCompleted + 1,
       totalGuesses: progress.totalGuesses + gameState.completedGuesses.length,
       savedGameState: null,
+      levelsCompletedForReview: reviewCount,
     };
     onProgressUpdate(updated);
   };

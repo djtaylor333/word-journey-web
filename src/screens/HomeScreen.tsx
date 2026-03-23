@@ -9,6 +9,7 @@ import { SEASON_KEYS, SEASON_META, seasonalLevelField, type SeasonKey } from '..
 interface HomeScreenProps {
   progress: PlayerProgress;
   onNavigate: (s: Screen) => void;
+  onProgressUpdate?: (p: PlayerProgress) => void;
 }
 
 const diffCards: { d: Difficulty; emoji: string; wordLen: number }[] = [
@@ -18,8 +19,40 @@ const diffCards: { d: Difficulty; emoji: string; wordLen: number }[] = [
   { d: 'vip',     emoji: '👑', wordLen: 0 },  // VIP is variable-length
 ];
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate, onProgressUpdate }) => {
   const [showVipLock, setShowVipLock] = useState(false);
+  // Review prompt: step 0 = hidden, 1 = 'do you like the game?', 2 = 'leave a review'
+  const [reviewStep, setReviewStep] = useState<0 | 1 | 2>(() =>
+    progress.levelsCompletedForReview >= 10 && !progress.hasReviewBeenRequested ? 1 : 0
+  );
+  const [reviewLiked, setReviewLiked] = useState(true);
+
+  const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.djtaylor.wordjourney';
+
+  const handleReviewConfirm = () => {
+    window.open(PLAY_STORE_URL, '_blank', 'noopener,noreferrer');
+    const updated: PlayerProgress = {
+      ...progress,
+      lives:    progress.lives + 5,
+      coins:    progress.coins + 1000,
+      diamonds: progress.diamonds + 10,
+      hasReviewBeenRequested: true,
+      reviewRewarded: true,
+      levelsCompletedForReview: 0,
+    };
+    onProgressUpdate?.(updated);
+    setReviewStep(0);
+  };
+
+  const handleReviewDismiss = () => {
+    const updated: PlayerProgress = {
+      ...progress,
+      hasReviewBeenRequested: true,
+      levelsCompletedForReview: 0,
+    };
+    onProgressUpdate?.(updated);
+    setReviewStep(0);
+  };
 
   const levelFor = (d: Difficulty): number => {
     if (d === 'easy') return progress.easyLevel;
@@ -253,6 +286,69 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
           message="VIP adventure mode is available in the Android app. Download to unlock unlimited VIP levels, exclusive themes, and more."
           onClose={() => setShowVipLock(false)}
         />
+      )}
+
+      {/* ── In-App Review Prompt Dialog ──────────────────────────────────── */}
+      {reviewStep > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="bg-surface rounded-2xl shadow-2xl p-6 w-full max-w-sm flex flex-col gap-4">
+            <div className="text-5xl text-center">
+              {reviewStep === 1 ? '🎮' : reviewLiked ? '⭐' : '💬'}
+            </div>
+            <h2 className="text-lg font-bold text-center text-onBg">
+              {reviewStep === 1
+                ? 'Enjoying Word Journeys?'
+                : reviewLiked
+                  ? 'You\'re Amazing!'
+                  : 'We Hear You!'}
+            </h2>
+            <p className="text-sm text-onSurface/80 text-center">
+              {reviewStep === 1
+                ? 'Have you been enjoying your Word Journeys experience so far?'
+                : reviewLiked
+                  ? 'We\'d love if you shared your experience with a review on the Play Store — it really helps others discover the game!'
+                  : 'We\'re sorry it hasn\'t been perfect yet. Your honest feedback on the Play Store helps us make it better for everyone!'}
+            </p>
+            {reviewStep === 2 && (
+              <div className="text-center text-sm font-semibold text-primary border-t border-border pt-3">
+                🎁 Reward: +5 ❤️ &nbsp;+1,000 🪙 &nbsp;+10 💎
+              </div>
+            )}
+            <div className="flex flex-col gap-2 pt-1">
+              {reviewStep === 1 ? (
+                <>
+                  <button
+                    className="w-full py-3 rounded-xl bg-primary text-onPrimary font-semibold hover:opacity-90 transition-opacity"
+                    onClick={() => { setReviewLiked(true); setReviewStep(2); }}
+                  >
+                    Yes! 😊
+                  </button>
+                  <button
+                    className="w-full py-2 rounded-xl text-onSurface/60 hover:text-onBg text-sm transition-colors"
+                    onClick={() => { setReviewLiked(false); setReviewStep(2); }}
+                  >
+                    Not Really
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="w-full py-3 rounded-xl bg-primary text-onPrimary font-semibold hover:opacity-90 transition-opacity"
+                    onClick={handleReviewConfirm}
+                  >
+                    {reviewLiked ? 'Rate on Play Store ⭐' : 'Leave Feedback 💬'}
+                  </button>
+                  <button
+                    className="w-full py-2 rounded-xl text-onSurface/60 hover:text-onBg text-sm transition-colors"
+                    onClick={handleReviewDismiss}
+                  >
+                    Maybe Later
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

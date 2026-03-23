@@ -160,7 +160,7 @@ export default function App() {
   }
 
   if (current.name === 'home') {
-    return <HomeScreen progress={progress} onNavigate={navigate} />;
+    return <HomeScreen progress={progress} onNavigate={navigate} onProgressUpdate={setProgress} />;
   }
 
   if (current.name === 'levelSelect') {
@@ -265,6 +265,6 @@ export default function App() {
     );
   }
 
-  return <HomeScreen progress={progress} onNavigate={navigate} />;
+  return <HomeScreen progress={progress} onNavigate={navigate} onProgressUpdate={setProgress} />;
 }
 

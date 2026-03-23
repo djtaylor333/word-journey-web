@@ -186,6 +186,11 @@ export interface PlayerProgress {
   seasonalHalloweenLevel: number;
   seasonalThanksgivingLevel: number;
   seasonalChristmasLevel: number;
+
+  // In-app review prompt tracking
+  levelsCompletedForReview: number;  // resets to 0 after review is requested
+  hasReviewBeenRequested: boolean;   // true once the review prompt has been shown
+  reviewRewarded: boolean;           // true once the review reward has been granted
 }
 
 // ─── Store ────────────────────────────────────────────────────────────────────

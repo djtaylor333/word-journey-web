@@ -89,6 +89,10 @@ export const DEFAULT_PROGRESS: PlayerProgress = {
   seasonalHalloweenLevel: 1,
   seasonalThanksgivingLevel: 1,
   seasonalChristmasLevel: 1,
+  // In-app review prompt tracking
+  levelsCompletedForReview: 0,
+  hasReviewBeenRequested: false,
+  reviewRewarded: false,
 };
 
 /**
