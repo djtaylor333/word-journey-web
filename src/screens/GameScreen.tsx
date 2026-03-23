@@ -518,8 +518,11 @@ const GameScreen: React.FC<GameScreenProps> = ({
       </div>
 
       {/* Game area */}
-      <div className={`relative z-10 flex-1 flex flex-col items-center justify-center min-h-0 ${compact ? 'gap-1 px-2 py-1' : 'gap-2 px-4 pt-1'}`}>
-        <GameGrid gameState={gameState} highContrast={progress.highContrast} compact={compact} />
+      <div className={`relative z-10 flex-1 flex flex-col items-center min-h-0 ${compact ? 'gap-1 px-2 py-1' : 'gap-2 px-4 pt-1'}`}>
+        {/* Grid wrapper — scrollable so active guess row stays visible when rows overflow */}
+        <div className="flex-1 overflow-y-auto w-full flex items-start justify-center min-h-0">
+          <GameGrid gameState={gameState} highContrast={progress.highContrast} compact={compact} />
+        </div>
         <ItemsBar
           addGuessItems={progress.addGuessItems}
           removeLetterItems={progress.removeLetterItems}

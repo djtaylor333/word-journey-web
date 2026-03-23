@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
-import type { PlayerProgress } from '../logic/types';
+import type { PlayerProgress, WordEntry } from '../logic/types';
 import { evaluateGuess } from '../logic/gameEngine';
 import { getWordsForLength } from '../logic/wordLoader';
+import { calcBonusMs, TIMER_FULL_BONUS_MS, TIMER_HALF_BONUS_MS } from '../logic/timerMode';
 
 interface TimerModeScreenProps {
   progress: PlayerProgress;
@@ -17,7 +18,9 @@ const DIFF_CONFIG: Record<string, { label: string; len: number; accent: string; 
   regular: { label: 'Regular', len: 5, accent: '#F59E0B', startMs: 4*60*1000 },
   hard:    { label: 'Hard',    len: 6, accent: '#EF4444', startMs: 5*60*1000 },
 };
-const BONUS_MS = 30_000;
+// Re-exported locally for template-literal readability
+const FULL_BONUS_MS = TIMER_FULL_BONUS_MS;
+const HALF_BONUS_MS = TIMER_HALF_BONUS_MS;
 
 const TimerModeScreen: React.FC<TimerModeScreenProps> = ({ progress, onProgress, onBack }) => {
   const [phase, setPhase] = useState<Phase>('SETUP');
@@ -25,12 +28,14 @@ const TimerModeScreen: React.FC<TimerModeScreenProps> = ({ progress, onProgress,
   const [countdown, setCountdown] = useState(3);
   const [timeMs, setTimeMs] = useState(0);
   const [score, setScore] = useState(0);
-  const [wordsWords, setWordsWords] = useState<string[]>([]);
+  const [wordEntries, setWordEntries] = useState<WordEntry[]>([]);
   const [wordIdx, setWordIdx] = useState(0);
   const [guesses, setGuesses] = useState<string[]>([]);
   const [current, setCurrent] = useState('');
   const [shake] = useState(false);
   const [isNewBest, setIsNewBest] = useState(false);
+  const [definitionUsedThisWord, setDefinitionUsedThisWord] = useState(false);
+  const [showDefinitionModal, setShowDefinitionModal] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const len = DIFF_CONFIG[diff].len;
 
@@ -44,9 +49,8 @@ const TimerModeScreen: React.FC<TimerModeScreenProps> = ({ progress, onProgress,
   useEffect(() => {
     if (phase === 'COUNTDOWN') {
       getWordsForLength(len).then(entries => {
-        const words = entries.map(e => e.word.toUpperCase());
-        const shuffled = [...words].sort(() => Math.random() - 0.5);
-        setWordsWords(shuffled);
+        const shuffled = [...entries].sort(() => Math.random() - 0.5);
+        setWordEntries(shuffled);
       });
       setCountdown(3);
       const iv = setInterval(() => {
@@ -102,21 +106,32 @@ const TimerModeScreen: React.FC<TimerModeScreenProps> = ({ progress, onProgress,
     return () => window.removeEventListener('keydown', handler);
   });
 
-  const target = wordsWords[wordIdx] ?? '';
+  const currentEntry = wordEntries[wordIdx];
+  const target = currentEntry?.word.toUpperCase() ?? '';
+
+  function useDefinition() {
+    if (!currentEntry?.definition) return;
+    setDefinitionUsedThisWord(true);
+    setShowDefinitionModal(true);
+  }
 
   function submit() {
     if (current.length !== len) return;
     const newGuesses = [...guesses, current];
-    if (current === target.toUpperCase()) {
+    if (current === target) {
+      // Halve time bonus if definition was used this word
+      const bonusMs = calcBonusMs(definitionUsedThisWord);
       setScore(s => s + 1);
-      setTimeMs(t => Math.min(t + BONUS_MS, DIFF_CONFIG[diff].startMs));
+      setTimeMs(t => Math.min(t + bonusMs, DIFF_CONFIG[diff].startMs));
       setGuesses([]);
       setCurrent('');
       setWordIdx(i => i + 1);
+      setDefinitionUsedThisWord(false);
     } else if (newGuesses.length >= 6) {
       setGuesses([]);
       setCurrent('');
       setWordIdx(i => i + 1);
+      setDefinitionUsedThisWord(false);
     } else {
       setGuesses(newGuesses);
       setCurrent('');
@@ -140,7 +155,7 @@ const TimerModeScreen: React.FC<TimerModeScreenProps> = ({ progress, onProgress,
       {/* SETUP */}
       {phase === 'SETUP' && (
         <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6">
-          <p className="text-onSurface/70 text-center text-sm">Solve as many words as you can before time runs out! Each correct word adds +30s.</p>
+          <p className="text-onSurface/70 text-center text-sm">Solve as many words as you can before time runs out!<br/>+30s per correct word (+15s if you used the free Define hint).</p>
           <div className="w-full space-y-3">
             {Object.entries(DIFF_CONFIG).map(([key, cfg]) => (
               <button
@@ -217,6 +232,21 @@ const TimerModeScreen: React.FC<TimerModeScreenProps> = ({ progress, onProgress,
             })}
           </div>
 
+          {/* Free Define button */}
+          {currentEntry?.definition && (
+            <button
+              onClick={useDefinition}
+              disabled={definitionUsedThisWord}
+              className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
+                definitionUsedThisWord
+                  ? 'border-borderFilled/30 text-onSurface/40 cursor-not-allowed'
+                  : 'border-green-500/60 text-green-400 active:scale-95'
+              }`}
+            >
+              {definitionUsedThisWord ? '📖 Define used · +15s bonus' : '📖 Free Define (+15s bonus)'}
+            </button>
+          )}
+
           {/* On-screen keyboard */}
           <div className="mt-auto w-full pb-4">
             {[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['ENTER','Z','X','C','V','B','N','M','⌫']].map((row, ri) => (
@@ -237,6 +267,23 @@ const TimerModeScreen: React.FC<TimerModeScreenProps> = ({ progress, onProgress,
                 ))}
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Definition modal */}
+      {showDefinitionModal && currentEntry?.definition && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-6">
+          <div className="bg-surface rounded-2xl p-6 w-full max-w-sm">
+            <div className="text-lg font-bold mb-2">📖 Definition</div>
+            <p className="text-onSurface/80 text-sm mb-4">{currentEntry.definition}</p>
+            <p className="text-yellow-500/70 text-xs mb-4">⚠️ Your time bonus this word will be +15s instead of +30s.</p>
+            <button
+              onClick={() => setShowDefinitionModal(false)}
+              className="w-full bg-accentRegular text-bg py-2 rounded-xl font-bold"
+            >
+              Got it
+            </button>
           </div>
         </div>
       )}

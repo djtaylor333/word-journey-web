@@ -36,6 +36,16 @@ const GameGrid: React.FC<GameGridProps> = ({ gameState, highContrast = false, co
     }
   }, [isInvalid]);
 
+  // Scroll the active input row into view after each guess submission.
+  // Uses 'nearest' so it only scrolls when the row is not fully visible,
+  // preventing the grid from jumping to the bottom on every input.
+  useEffect(() => {
+    if (completedGuesses.length > 0 && activeRowRef.current) {
+      activeRowRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completedGuesses.length]);
+
   // Build the display for the active (current input) row
   const activeRowLetters = buildFullInputForDisplay(currentInput, prefilledPositions, wordLen);
 
