@@ -283,10 +283,10 @@ describe('applyAddGuess', () => {
 
 // ─── applyBonusGuessesForLife ─────────────────────────────────────────────────
 describe('applyBonusGuessesForLife', () => {
-  it('grants BONUS_ATTEMPTS_PER_LIFE guesses for easy (3)', () => {
+  it('grants BONUS_ATTEMPTS_PER_LIFE guesses for easy (10)', () => {
     const state = makeGame('ABLE', { difficulty: 'easy', status: 'OUT_OF_GUESSES', maxGuesses: 8 });
     const next = applyBonusGuessesForLife(state);
-    expect(next.maxGuesses).toBe(8 + BONUS_ATTEMPTS_PER_LIFE['easy']); // 11
+    expect(next.maxGuesses).toBe(8 + BONUS_ATTEMPTS_PER_LIFE['easy']); // 18
     expect(next.status).toBe('IN_PROGRESS');
   });
 

@@ -39,7 +39,7 @@ export const DIFFICULTY_MAX_GUESSES: Record<Difficulty, number> = {
 
 /** Extra guesses granted when spending a life mid-level */
 export const BONUS_ATTEMPTS_PER_LIFE: Record<Difficulty, number> = {
-  easy: 3,
+  easy: 10,
   regular: 2,
   hard: 1,
   vip: 2,

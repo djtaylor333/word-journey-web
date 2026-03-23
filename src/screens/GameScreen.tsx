@@ -46,6 +46,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
   // Compact mode: shrink tiles/keyboard when screen height < 700px
   const [compact, setCompact] = useState(false);
   const lifeSpent = useRef(false);
+  const guessSubmittedRef = useRef(false);  // true after first valid guess is evaluated
   const gameLoadedRef = useRef(false);  // true once a GameState has been set
   const winHandledRef = useRef(false);  // prevent handleWin firing more than once
   const loseHandledRef = useRef(false); // prevent lose sound firing more than once
@@ -215,6 +216,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
     const next = handleKeyPress(gameState, key, validWords);
     // Row just submitted — play staggered tile reveal sounds
     if (next.completedGuesses.length > gameState.completedGuesses.length) {
+      guessSubmittedRef.current = true;  // player has submitted at least one guess
       const row = next.completedGuesses[next.completedGuesses.length - 1];
       row.states.forEach((state, i) => {
         setTimeout(() => {
@@ -226,6 +228,19 @@ const GameScreen: React.FC<GameScreenProps> = ({
     }
     setGameState(next);
   }, [gameState, validWords, showRemovePicker, progress, onProgressUpdate]);
+
+  /**
+   * Navigate back — refunds the life spent to enter this level if the player
+   * never submitted a valid guess (prevents losing a life on accidental taps).
+   */
+  const handleBack = useCallback(() => {
+    if (lifeSpent.current && !guessSubmittedRef.current && !isReplay && !isDailyChallenge) {
+      // Refund the life deducted on level entry
+      const refunded = startRegenTimer({ ...progress, lives: progress.lives + 1 });
+      onProgressUpdate(refunded);
+    }
+    onBack();
+  }, [progress, onProgressUpdate, onBack, isReplay, isDailyChallenge]);
 
   const handleAddGuess = () => {
     if (!gameState || progress.addGuessItems <= 0) return;
@@ -442,7 +457,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
         {compact ? (
           /* Compact: single row with level, difficulty, lives, coins */
           <div className="flex items-center gap-2">
-            <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-xl p-2 rounded-lg hover:bg-surface/80 active:scale-90 transition-all">←</button>
+            <button onClick={handleBack} className="text-onSurface/60 hover:text-onBg text-xl p-2 rounded-lg hover:bg-surface/80 active:scale-90 transition-all">←</button>
             <span className="font-bold text-onBg text-sm">
               {isDailyChallenge ? '📅 Daily' : `Lvl ${level}`}
             </span>
@@ -461,7 +476,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
           <>
             {/* Row 1 */}
             <div className="flex items-center gap-2 mb-1.5">
-              <button onClick={onBack} className="text-onSurface/60 hover:text-onBg text-2xl p-3 rounded-xl hover:bg-surface/80 active:scale-90 transition-all">←</button>
+              <button onClick={handleBack} className="text-onSurface/60 hover:text-onBg text-2xl p-3 rounded-xl hover:bg-surface/80 active:scale-90 transition-all">←</button>
               <div className="flex-1 text-center">
                 <span className="font-bold text-onBg text-lg">
                   {isDailyChallenge ? '📅 Daily Challenge' : `Level ${level}`}

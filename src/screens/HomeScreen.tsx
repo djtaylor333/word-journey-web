@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import type { PlayerProgress, Screen, Difficulty } from '../logic/types';
-import { DIFFICULTY_ACCENT, DIFFICULTY_LABELS } from '../logic/types';
+import { DIFFICULTY_ACCENT, DIFFICULTY_LABELS, DIFFICULTY_MAX_GUESSES, BONUS_LIFE_EVERY } from '../logic/types';
 import LivesDisplay from '../components/LivesDisplay';
 import LockOverlay from '../components/LockOverlay';
 import { SEASON_KEYS, SEASON_META, seasonalLevelField, type SeasonKey } from '../logic/seasonalWordPacks';
@@ -11,11 +11,11 @@ interface HomeScreenProps {
   onNavigate: (s: Screen) => void;
 }
 
-const diffCards: { d: Difficulty; emoji: string; desc: string }[] = [
-  { d: 'easy',    emoji: '🌿', desc: '4-letter words' },
-  { d: 'regular', emoji: '⚔️', desc: '5-letter words' },
-  { d: 'hard',    emoji: '🔥', desc: '6-letter words' },
-  { d: 'vip',     emoji: '👑', desc: 'Mixed lengths' },
+const diffCards: { d: Difficulty; emoji: string; wordLen: number }[] = [
+  { d: 'easy',    emoji: '🌿', wordLen: 4 },
+  { d: 'regular', emoji: '⚔️', wordLen: 5 },
+  { d: 'hard',    emoji: '🔥', wordLen: 6 },
+  { d: 'vip',     emoji: '👑', wordLen: 0 },  // VIP is variable-length
 ];
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
@@ -96,10 +96,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
         <section>
           <h2 className="text-onSurface/70 text-sm font-bold uppercase tracking-widest mb-3">🗺️ Adventure</h2>
           <div className="grid grid-cols-2 gap-4">
-            {diffCards.map(({ d, emoji, desc }) => {
+            {diffCards.map(({ d, emoji, wordLen }) => {
               const accent = DIFFICULTY_ACCENT[d];
               const lv = levelFor(d);
               const isVip = d === 'vip';
+              const maxGuesses = DIFFICULTY_MAX_GUESSES[d];
+              const bonusLifeEvery = BONUS_LIFE_EVERY[d];
+              const desc = isVip
+                ? 'Mixed lengths • 6 guesses'
+                : `${wordLen}-letter words • ${maxGuesses} guesses`;
+              const subDesc = isVip
+                ? 'x2 rewards • VIP only'
+                : `Every ${bonusLifeEvery} levels = +1 life`;
               return (
                 <button
                   key={d}
@@ -119,11 +127,28 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onNavigate }) => {
                   <span className="font-bold text-base" style={{ color: accent }}>
                     {DIFFICULTY_LABELS[d]}
                   </span>
-                  <span className="text-onSurface/50 text-xs">{desc}</span>
-                  <span className="text-onSurface/70 font-semibold text-xs mt-1">Level {lv}</span>
+                  <span className="text-onSurface/50 text-xs text-center">{desc}</span>
+                  <span className="text-onSurface/40 text-xs text-center">{subDesc}</span>
+                  <span className="text-onSurface/70 font-semibold text-xs mt-1">Lv. {lv}</span>
                 </button>
               );
             })}
+          </div>
+        </section>
+
+        {/* Star Levels — Coming Soon */}
+        <section>
+          <h2 className="text-onSurface/70 text-sm font-bold uppercase tracking-widest mb-3">⭐ Star Levels</h2>
+          <div className="flex items-center gap-4 p-5 rounded-2xl bg-surface border border-coinGold/30">
+            <span className="text-4xl">⭐</span>
+            <div className="flex-1">
+              <div className="font-bold text-coinGold text-base">Star Levels</div>
+              <div className="text-onSurface/50 text-sm">Unlock by earning stars in Adventure</div>
+              <div className="text-onSurface/40 text-xs mt-0.5">Special challenge levels — coming soon!</div>
+            </div>
+            <div className="text-xs bg-surface/80 border border-borderFilled/30 text-onSurface/50 font-semibold px-3 py-1.5 rounded-full whitespace-nowrap">
+              🔒 Soon
+            </div>
           </div>
         </section>
 
